@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="Launcher Extension Category"
+            id="com.github.pedrosans.launcherextension.commands.category">
+      </category>
+      <command
+            name="Lanch Correspondent Test Command"
+            categoryId="com.github.pedrosans.launcherextension.commands.category"
+            id="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest">
+      </command>
+      <command
+            categoryId="com.github.pedrosans.launcherextension.commands.category"
+            id="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration"
+            name="Lanch Prefered Configuration Command">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest"
+            class="com.github.pedrosans.launcherextension.command.CorrespondentTestLaunchHandler">
+      </handler>
+      <handler
+            class="com.github.pedrosans.launcherextension.command.PreferedConfigurationHandler"
+            commandId="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="CTRL+F12"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F12">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.github.pedrosans.launcherextension.toolbars.launch"
+               label="Launcher Extensions">
+            <command
+                  commandId="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest"
+                  icon="icons/julaunch.png"
+                  id="com.github.pedrosans.launcherextension.toolbars.launchCorrespondentTestCommand"
+                  mnemonic="M+F12"
+                  tooltip="Launch Correspondent Test">
+            </command>
+            <command
+                  commandId="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration"
+                  icon="icons/greenheart.png"
+                  id="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration"
+                  mnemonic="F12"
+                  style="pulldown"
+                  tooltip="Launch Prefered Configuration">
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:com.github.pedrosans.launcherextension.command.launchPreferedConfiguration">
+         <dynamic
+               class="com.github.pedrosans.launcherextension.toolbar.PreferedConfigurationMenu"
+               id="com.github.pedrosans.launcherextension.toolbar.PreferedConfigurationMenu">
+         </dynamic>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.eclipse.debug.ui.LaunchingPreferencePage"
+            class="com.github.pedrosans.launcherextension.preference.LauncherExtensionPreferencePage"
+            id="com.github.pedrosans.launcherextension.preference.launcherextensionPreferencePage"
+            name="Launch Extension">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.github.pedrosans.launcherextension.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>
