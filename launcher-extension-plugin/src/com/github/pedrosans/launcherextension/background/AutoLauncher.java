@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pedrosans.launcherextension;
+package com.github.pedrosans.launcherextension.background;
 
 import java.util.Set;
 
@@ -26,7 +26,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
-import com.github.pedrosans.launcherextension.background.TestMonitor;
+import com.github.pedrosans.launcherextension.LauncherExtension;
+import com.github.pedrosans.launcherextension.ManagedConfigurations;
 
 /**
  * @author Pedro Santos

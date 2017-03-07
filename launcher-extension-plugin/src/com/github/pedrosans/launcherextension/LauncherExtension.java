@@ -16,8 +16,6 @@
  */
 package com.github.pedrosans.launcherextension;
 
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
@@ -47,7 +45,6 @@ public class LauncherExtension extends AbstractUIPlugin {
 
 	public LauncherExtension() {
 		instance = this;
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
 	}
 
 	public static LauncherExtension getInstance() {
