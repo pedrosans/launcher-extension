@@ -70,6 +70,9 @@ public class ManagedConfigurations {
 		for (int i = 0; i < configurations.length; i++) {
 			ILaunchConfiguration configuration = configurations[i];
 
+			if (configuration.getMappedResources() == null)
+				continue;
+
 			for (IResource configuredResource : configuration.getMappedResources()) {
 
 				if (configuredResource.getFileExtension() == null)
