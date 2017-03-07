@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pedrosans.launcherextension;
+package com.github.pedrosans.launcherextension.background;
 
 import static org.eclipse.core.resources.IResourceDelta.CHANGED;
 import static org.eclipse.core.resources.IncrementalProjectBuilder.AUTO_BUILD;
@@ -27,6 +27,8 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import com.github.pedrosans.launcherextension.LauncherExtension;
 
 /**
  * @author Pedro Santos
