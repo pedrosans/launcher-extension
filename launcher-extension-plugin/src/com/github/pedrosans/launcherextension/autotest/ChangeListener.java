@@ -26,7 +26,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
@@ -48,26 +50,35 @@ public class ChangeListener implements IResourceChangeListener {
 		if (!built || event.getDelta().getKind() != CHANGED)
 			return;
 
-		DeltaResources resources = new DeltaResources();
-		resources.addBuiltResources(event.getDelta().getAffectedChildren());
+		Leafs changedFiles = new Leafs();
 
-		if (resources.size() == 1)
-			AutoLauncher.launchTest(resources.get(0));
+		try {
+			event.getDelta().accept(changedFiles, false);
+		} catch (CoreException e) {
+			LauncherExtension.getDefault().getLog().log(e.getStatus());
+		}
+
+		if (changedFiles.size() == 1)
+			AutoLauncher.launchTest(changedFiles.get(0));
 
 	}
 
-	static class DeltaResources extends ArrayList<IResource> {
+	static class Leafs extends ArrayList<IResource> implements IResourceDeltaVisitor {
+		private static final String INNER_CLASS_NAME_SEPARATOR = "$";
+		private static final String CLASS = "class";
 		private static final long serialVersionUID = 1L;
 
-		void addBuiltResources(IResourceDelta[] delta) {
-			for (IResourceDelta child : delta) {
-				if ("class".equals(child.getResource().getFileExtension())) {
-					add(child.getResource());
-				} else if (child.getAffectedChildren().length > 0) {
-					addBuiltResources(child.getAffectedChildren());
-				}
+		@Override
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			if (
+					CLASS.equals(delta.getResource().getFileExtension())
+					&& !delta.getResource().getName().contains(INNER_CLASS_NAME_SEPARATOR)
+			) {
+				add(delta.getResource());
 			}
+			return true;
 		}
+
 	}
 
 }
