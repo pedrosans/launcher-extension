@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -124,7 +125,7 @@ public class MenuContributions extends ArrayList<IContributionItem> {
 		public SetPreference(ILaunchConfiguration configuration) {
 			this.configuration = configuration;
 			setText(configuration.getName());
-			setImageDescriptor(PlayConfigIcon.of(configuration));
+			setImageDescriptor(DebugUITools.getDefaultImageDescriptor(configuration));
 		}
 
 		@Override
