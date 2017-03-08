@@ -29,8 +29,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = LauncherExtension.getDefault().getPreferenceStore();
-		store.setDefault(PreferenceConstants.P_AUTO_TEST, true);
-		store.setDefault(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND, true);
+		store.setDefault(PreferenceConstants.P_AUTO_TEST, false);
+		store.setDefault(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND, false);
 		store.setDefault(PreferenceConstants.P_AUTO_TEST_PROJECT_ON_MULTIPLE_FILES_CHANGED, false);
 		store.setDefault(PreferenceConstants.P_CLASS_TEST_FILE_PATTERN, "{class_name}Test");
 		store.setDefault(PreferenceConstants.P_PREFERED_LAUNCH_MODE, ILaunchManager.DEBUG_MODE);
