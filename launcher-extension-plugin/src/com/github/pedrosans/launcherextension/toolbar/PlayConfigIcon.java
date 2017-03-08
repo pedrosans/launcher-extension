@@ -61,7 +61,7 @@ public class PlayConfigIcon extends CompositeImageDescriptor {
 
 		drawImage(bg, 0, 0);
 
-		drawImage(LauncherExtension.run_ovr_icon.getImageData(), 0, 0);
+		drawImage(LauncherExtension.run_ovr_icon.getImageData(), 9, -1);
 	}
 
 	@Override

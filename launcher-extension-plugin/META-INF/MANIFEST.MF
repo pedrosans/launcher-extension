@@ -11,7 +11,11 @@ Require-Bundle: org.eclipse.jdt.launching;bundle-version="3.7.1",
  org.eclipse.jdt.junit;bundle-version="3.7.200",
  org.eclipse.core.expressions;bundle-version="3.4.501",
  org.eclipse.debug.ui;bundle-version="3.9.0",
- org.junit
+ org.junit,
+ org.eclipse.ui.ide;bundle-version="3.9.2",
+ org.eclipse.jface.text;bundle-version="3.8.101",
+ org.eclipse.ui.editors;bundle-version="3.8.100",
+ org.eclipse.jdt.ui;bundle-version="3.9.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.github.pedrosans.launcherextension.LauncherExtension
 Bundle-ActivationPolicy: lazy

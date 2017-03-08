@@ -14,20 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pedrosans.launcherextension.background;
-
-import java.util.Set;
+package com.github.pedrosans.launcherextension.autotest;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 import com.github.pedrosans.launcherextension.ManagedConfigurations;
+import com.github.pedrosans.launcherextension.background.TestMonitor;
 
 /**
  * @author Pedro Santos
@@ -35,29 +32,18 @@ import com.github.pedrosans.launcherextension.ManagedConfigurations;
  */
 public class AutoLauncher {
 
-	public static boolean launching;
-
 	public static void launchTest(IResource resource) {
 		try {
-			Set<ILaunchConfiguration> c = ManagedConfigurations.lookupTest(resource);
-			if (c.isEmpty()) {
+			ILaunchConfiguration configuration = ManagedConfigurations.lookupTest(resource);
+			if (configuration == null) {
 				LauncherExtension.getDefault().getLog().log(new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
 						"Auto test can't find a correpondent test for the changed class"));
-			} else if (c.size() == 1) {
-
-				TestMonitor monitor = new TestMonitor();
-
-				JUnitCorePlugin.getDefault().getNewTestRunListeners().add(monitor);
-				JUnitCorePlugin.getModel().addTestRunSessionListener(monitor);
-
-				ILaunch launch = c.iterator().next().launch(ILaunchManager.RUN_MODE, null);
-
-				System.out.println("Auto launched: " + launch.getLaunchConfiguration().getName());
-
-			} else {
-				LauncherExtension.getDefault().getLog().log(new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
-						"Multiple tests found for the changed class"));
+				return;
 			}
+
+			new TestMonitor(configuration.getMappedResources()[0]).install();
+
+			configuration.launch(ILaunchManager.RUN_MODE, null);
 
 		} catch (CoreException e) {
 			LauncherExtension.getDefault().getLog().log(e.getStatus());

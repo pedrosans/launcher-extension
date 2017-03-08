@@ -14,20 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pedrosans.launcherextension.background;
+package com.github.pedrosans.launcherextension;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IStartup;
 
+import com.github.pedrosans.launcherextension.autotest.ChangeListener;
+import com.github.pedrosans.launcherextension.background.ViewPartListener;
+
 /**
  * @author Pedro Santos
- *
+ * 
  */
 public class StartFilesChangeListener implements IStartup {
 
 	@Override
 	public void earlyStartup() {
+		LauncherExtension.getWorkbenchWindow(false).getActivePage().addPartListener(new ViewPartListener());
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
 	}
 

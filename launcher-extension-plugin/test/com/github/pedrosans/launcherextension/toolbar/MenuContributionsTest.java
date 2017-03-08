@@ -55,7 +55,7 @@ public class MenuContributionsTest {
 	private StubConfig coreApp = new StubConfig("core app");
 	private List<ILaunchConfiguration> fav = new ArrayList<ILaunchConfiguration>();
 	private List<ILaunchConfiguration> last = new ArrayList<ILaunchConfiguration>();
-
+//TODO show (no launch history)
 	@Before
 	public void initialize() {
 		menuContributions = new MenuContributions("core app", fav, last) {
