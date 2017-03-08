@@ -19,8 +19,11 @@ package com.github.pedrosans.launcherextension;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -28,11 +31,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
 
 /**
  * @author Pedro Santos
- *
+ * 
  */
 public class LauncherExtension extends AbstractUIPlugin {
 
@@ -58,14 +62,10 @@ public class LauncherExtension extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		run_exc_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
-		run_ovr_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
-		greenheart_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
-		julaunch_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
+		run_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
+		run_ovr_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
+		greenheart_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
+		julaunch_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
 
 	}
 
@@ -97,24 +97,73 @@ public class LauncherExtension extends AbstractUIPlugin {
 		return getPreferenceStore().getString(PreferenceConstants.P_CLASS_TEST_FILE_PATTERN);
 	}
 
-	public static TestRunnerViewPart getJunitView() {
-		IWorkbenchPage page = null;
-		IWorkbenchWindow window = getWorkbenchWindow();
+	public boolean isSetToAutoRunTestsInBackground() {
+		return getPreferenceStore().getBoolean(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND);
+	}
+
+	public static TestRunnerViewPart getJunitView(boolean fromActiveWindow) {
+		IWorkbenchWindow window = getWorkbenchWindow(fromActiveWindow);
 		if (window == null)
 			return null;
-		page = window.getActivePage();
+		IWorkbenchPage page = window.getActivePage();
 		if (page == null)
 			return null;
 		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-
 	}
 
 	public static IWorkbenchWindow getWorkbenchWindow() {
+		return getWorkbenchWindow(false);
+	}
+
+	public static IWorkbenchWindow getWorkbenchWindow(boolean fromActiveWindow) {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		if (window == null && wb.getWorkbenchWindows().length == 1)
+		if (window == null && !fromActiveWindow && wb.getWorkbenchWindows().length == 1)
 			window = wb.getWorkbenchWindows()[0];
 		return window;
+	}
+
+	public static Display getDisplay() {
+		Display display = Display.getCurrent();
+		if (display == null) {
+			display = Display.getDefault();
+		}
+		return display;
+	}
+
+	public static StatusLineItem getStatusLineItem() {
+		IStatusLineManager manager = getStatusLineManager();
+		StatusLineItem item = (StatusLineItem) manager.find("asdf");
+
+		if (item == null)
+			item = addStatusBar();
+
+		return item;
+	}
+
+	public static StatusLineItem addStatusBar() {
+		StatusLineItem item = new StatusLineItem("asdf");
+		try {
+			getStatusLineManager().insertBefore("ElementState", item);
+		} catch (final IllegalArgumentException e) {
+			getStatusLineManager().add(item);
+		}
+
+		item.setVisible(true);
+		LauncherExtension.getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				getStatusLineManager().update(true);
+			}
+		});
+		return item;
+	}
+
+	private static IStatusLineManager getStatusLineManager() {
+		IWorkbenchWindow workbenchWindow = LauncherExtension.getWorkbenchWindow();
+		IEditorPart editor = workbenchWindow.getActivePage().getActiveEditor();
+		IStatusLineManager manager = editor.getEditorSite().getActionBars().getStatusLineManager();
+		return manager;
 	}
 
 }

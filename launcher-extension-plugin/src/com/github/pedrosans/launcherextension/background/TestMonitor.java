@@ -18,6 +18,7 @@ package com.github.pedrosans.launcherextension.background;
 
 import java.lang.reflect.Field;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
@@ -29,38 +30,62 @@ import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jdt.internal.junit.ui.UITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
+import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
 /**
+ * This run won't show even in Test Run History session if in background
+ * 
  * @author Pedro Santos
- *
+ * 
  */
-public class TestMonitor extends TestRunListener implements ITestRunSessionListener, ITestSessionListener {
-	private UITestRunListener layoutHijacker;
-	private ITestRunSessionListener selectionHijacker;
+public class TestMonitor extends TestRunListener implements ITestRunSessionListener, ITestSessionListener, Runnable {
+	private UITestRunListener viewLayoutHijacker;
+	private ITestRunSessionListener sessionHijacker;
+	private TestRunnerViewPart junitView;
 
-	boolean background = true;
-	private TestRunnerViewPart view;
+	private int size;
+	private int completed;
+	private IResource testFile;
 
-	public TestMonitor() {
+	public TestMonitor(IResource testFile) {
+		this.testFile = testFile;
 
-		view = LauncherExtension.getJunitView();
-		JUnitCorePlugin plugin = JUnitCorePlugin.getDefault();
+	}
 
-		for (Object listener : plugin.getNewTestRunListeners().getListeners())
-			if (listener instanceof UITestRunListener)
-				plugin.getNewTestRunListeners().remove(this.layoutHijacker = (UITestRunListener) listener);
+	public void install() {
+		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(this);
+		JUnitCorePlugin.getModel().addTestRunSessionListener(this);
 
-		flagViewToDontGetFocus();
+		PlatformUI.getWorkbench().getDisplay().syncExec(this);
 
-		if (background) {
-			selectionHijacker = getSessionSelectionHijacker();
-			if (selectionHijacker != null)
-				JUnitCorePlugin.getModel().removeTestRunSessionListener(selectionHijacker);
+		viewLayoutHijacker = getViewLayoutHijacker();
+
+		if (viewLayoutHijacker != null)
+			JUnitCorePlugin.getDefault().getNewTestRunListeners().remove(viewLayoutHijacker);
+
+		if (LauncherExtension.getDefault().isSetToAutoRunTestsInBackground()) {
+			flagViewToDontGetFocus();
+
+			sessionHijacker = getSessionHijacker();
+
+			if (sessionHijacker != null)
+				JUnitCorePlugin.getModel().removeTestRunSessionListener(sessionHijacker);
 		}
+	}
 
+	private void showProgress() {
+		String progress = String.format("Testing %2.0f%%", (float) completed / size * 100);
+		LauncherExtension.getStatusLineItem().info(testFile, progress);
+	}
+
+	// Runnable
+	@Override
+	public void run() {
+		junitView = LauncherExtension.getJunitView(false);
 	}
 
 	// ITestRunSessionListener
@@ -68,29 +93,38 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	public void sessionAdded(TestRunSession testRunSession) {
 		testRunSession.addTestSessionListener(this);
 
-		if (selectionHijacker != null)
-			JUnitCorePlugin.getModel().addTestRunSessionListener(selectionHijacker);
+		if (sessionHijacker != null)
+			JUnitCorePlugin.getModel().addTestRunSessionListener(sessionHijacker);
 	}
 
 	@Override
 	public void sessionRemoved(TestRunSession testRunSession) {
 	}
 
-	// ITestRunSessionListener
+	// TestRunListener
 	@Override
 	public void sessionLaunched(ITestRunSession session) {
 	}
 
 	@Override
 	public void sessionStarted(ITestRunSession session) {
+		LauncherExtension.getStatusLineItem().info(testFile, "Testing 1%");
 	}
 
 	@Override
 	public void sessionFinished(ITestRunSession session) {
-		if (layoutHijacker != null)
-			JUnitCorePlugin.getDefault().getNewTestRunListeners().add(layoutHijacker);
+
+		Result result = session.getTestResult(false);
+		if (result == Result.ERROR || result == Result.FAILURE)
+			LauncherExtension.getStatusLineItem().error(testFile, "Test failed");
+		else
+			LauncherExtension.getStatusLineItem().clean(testFile);
+
+		if (viewLayoutHijacker != null)
+			JUnitCorePlugin.getDefault().getNewTestRunListeners().add(viewLayoutHijacker);
 		JUnitCorePlugin.getDefault().getNewTestRunListeners().remove(this);
-		view = null;
+		JUnitCorePlugin.getModel().removeTestRunSessionListener(this);
+		((TestRunSession) session).removeTestSessionListener(this);
 	}
 
 	@Override
@@ -129,17 +163,19 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	@Override
 	public void sessionTerminated() {
-
 	}
 
 	@Override
 	public void testAdded(TestElement testElement) {
-
+		if (testElement instanceof TestCaseElement)
+			size++;
 	}
 
 	@Override
 	public void testEnded(TestCaseElement testCaseElement) {
-
+		completed++;
+		if (completed < size)
+			showProgress();
 	}
 
 	@Override
@@ -148,8 +184,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	}
 
 	@Override
-	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult,
-			String actualResult) {
+	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 
 	}
 
@@ -158,13 +193,19 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	}
 
-	private static ITestRunSessionListener getSessionSelectionHijacker() {
-		TestRunnerViewPart view = LauncherExtension.getJunitView();
-		if (view != null) {
+	private UITestRunListener getViewLayoutHijacker() {
+		for (Object listener : JUnitCorePlugin.getDefault().getNewTestRunListeners().getListeners())
+			if (listener instanceof UITestRunListener)
+				return (UITestRunListener) listener;
+		return null;
+	}
+
+	private ITestRunSessionListener getSessionHijacker() {
+		if (junitView != null) {
 			try {
 				Field hijackerField = TestRunnerViewPart.class.getDeclaredField("fTestRunSessionListener");
 				hijackerField.setAccessible(true);
-				return (ITestRunSessionListener) hijackerField.get(view);
+				return (ITestRunSessionListener) hijackerField.get(junitView);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -172,12 +213,17 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 		return null;
 	}
 
+	/**
+	 * Relies on the referenced view since it's called in the test listener
+	 * thread.
+	 * 
+	 */
 	private void flagViewToDontGetFocus() {
-		if (view != null) {
+		if (junitView != null) {
 			try {
 				Field fShowOnErrorOnly = TestRunnerViewPart.class.getDeclaredField("fShowOnErrorOnly");
 				fShowOnErrorOnly.setAccessible(true);
-				fShowOnErrorOnly.set(view, true);
+				fShowOnErrorOnly.set(junitView, true);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

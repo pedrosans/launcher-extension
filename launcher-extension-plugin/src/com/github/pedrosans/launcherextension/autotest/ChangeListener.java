@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pedrosans.launcherextension.background;
+package com.github.pedrosans.launcherextension.autotest;
 
 import static org.eclipse.core.resources.IResourceDelta.CHANGED;
 import static org.eclipse.core.resources.IncrementalProjectBuilder.AUTO_BUILD;

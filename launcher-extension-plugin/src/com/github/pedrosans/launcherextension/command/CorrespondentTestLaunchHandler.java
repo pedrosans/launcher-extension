@@ -16,8 +16,6 @@
  */
 package com.github.pedrosans.launcherextension.command;
 
-import java.util.Set;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -26,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
@@ -40,19 +39,18 @@ public class CorrespondentTestLaunchHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart workbenchPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-				.getActivePart();
-		Object adapter = workbenchPart.getSite().getPage().getActiveEditor().getEditorInput().getAdapter(IFile.class);
-		IFile file = (IFile) adapter;
-		if (file == null) {
+		IWorkbenchPart workbenchPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
+		IEditorPart activeEditor = workbenchPart.getSite().getPage().getActiveEditor();
+		if (activeEditor == null) {
 			Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
-			MessageDialog.openInformation(shell, "No test was launched", "No file editor got detected.");
+			MessageDialog.openInformation(shell, "No test was launched", "No file editor.");
 			return null;
 		} else {
 			try {
-				Set<ILaunchConfiguration> c = ManagedConfigurations.lookupTest(file);
-				if (c.size() == 1) {
-					c.iterator().next().launch(LauncherExtension.getDefault().getPreferedLaunchMode(), null);
+				IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
+				ILaunchConfiguration c = ManagedConfigurations.lookupTest(file);
+				if (c != null) {
+					c.launch(LauncherExtension.getDefault().getPreferedLaunchMode(), null);
 				} else {
 					Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
 					MessageDialog.openInformation(shell, "No test was launched",

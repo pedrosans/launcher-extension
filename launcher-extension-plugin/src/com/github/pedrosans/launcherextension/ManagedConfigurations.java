@@ -43,7 +43,10 @@ import org.eclipse.debug.ui.IDebugUIConstants;
  */
 public class ManagedConfigurations {
 
-	public static Set<ILaunchConfiguration> lookupTest(IResource resource) throws CoreException {
+	/**
+	 * Correspondent test for this specific resource
+	 */
+	public static ILaunchConfiguration lookupTest(IResource resource) throws CoreException {
 
 		String classTestFilePattern = LauncherExtension.getDefault().getClassTestFilePattern();
 		String testName = classTestFilePattern.replace("{class_name}", resource.getName());
@@ -57,11 +60,13 @@ public class ManagedConfigurations {
 			if (configuration.getAttribute("org.eclipse.jdt.junit.TESTNAME", "").isEmpty() == false)
 				i.remove();
 		}
-		return result;
+		if (result.size() == 1)
+			return result.iterator().next();
+		else
+			return null;
 	}
 
-	public static Set<ILaunchConfiguration> lookup(IProject project, String fileName, String fileExtension)
-			throws CoreException {
+	public static Set<ILaunchConfiguration> lookup(IProject project, String fileName, String fileExtension) throws CoreException {
 
 		Set<ILaunchConfiguration> result = new HashSet<>();
 
@@ -78,8 +83,7 @@ public class ManagedConfigurations {
 				if (configuredResource.getFileExtension() == null)
 					continue;
 
-				String confName = configuredResource.getName().replace(configuredResource.getFileExtension(), "")
-						.replace(".", "");
+				String confName = configuredResource.getName().replace(configuredResource.getFileExtension(), "").replace(".", "");
 				String name = fileName.replace(fileExtension, "").replace(".", "");
 
 				if (configuredResource.getProject().equals(project) && confName.contains(name))
@@ -108,10 +112,8 @@ public class ManagedConfigurations {
 
 		List<ILaunchConfiguration> lastLaunches = new ArrayList<ILaunchConfiguration>();
 
-		LaunchConfigurationManager launchConfigurationManager = DebugUIPlugin.getDefault()
-				.getLaunchConfigurationManager();
-		LaunchGroupExtension fGroup = launchConfigurationManager
-				.getLaunchGroup(IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+		LaunchConfigurationManager launchConfigurationManager = DebugUIPlugin.getDefault().getLaunchConfigurationManager();
+		LaunchGroupExtension fGroup = launchConfigurationManager.getLaunchGroup(IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
 
 		LaunchHistory launchHistory = launchConfigurationManager.getLaunchHistory(fGroup.getIdentifier());
 		for (ILaunchConfiguration launchConfiguration : launchHistory.getHistory()) {
