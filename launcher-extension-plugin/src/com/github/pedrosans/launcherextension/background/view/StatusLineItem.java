@@ -60,7 +60,7 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 
 	@Override
 	public void run() {
-		if (scheduled == null)
+		if (scheduled == null || label == null || label.isDisposed())
 			return;
 		String info = infoMap.get(scheduled.getFullPath().toString());
 		if (info != null) {
@@ -87,21 +87,18 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 	public void error(IResource resource, String error) {
 		errorMap.put(resource.getFullPath().toString(), error);
 		scheduled = resource;
-		if (label != null && !label.isDisposed())
-			LauncherExtension.getDisplay().asyncExec(this);
+		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
 	public void update(IResource resource) {
 		scheduled = resource;
-		if (label != null && !label.isDisposed())
-			LauncherExtension.getDisplay().asyncExec(this);
+		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
 	public void clean(IResource resource) {
 		infoMap.remove(resource.getFullPath().toString());
 		errorMap.remove(resource.getFullPath().toString());
 		scheduled = resource;
-		if (label != null && !label.isDisposed())
-			LauncherExtension.getDisplay().asyncExec(this);
+		LauncherExtension.getDisplay().asyncExec(this);
 	}
 }

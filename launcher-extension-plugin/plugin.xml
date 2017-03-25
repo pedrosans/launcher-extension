@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="com.github.pedrosans.launcherextension.StartFilesChangeListener">
+            class="com.github.pedrosans.launcherextension.LauncherExtension">
       </startup>
    </extension>
 
