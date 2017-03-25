@@ -45,9 +45,11 @@ import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
  */
 public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
+	private static final String TEST_STATUS_LINE = "test.status.line";
 	private static LauncherExtension instance;
 	public static final String PLUGIN_ID = "launcher.extension";
 	public static ImageDescriptor run_exc_icon;
+	public static ImageDescriptor debug_exc_icon;
 	public static ImageDescriptor run_ovr_icon;
 	public static ImageDescriptor julaunch_icon;
 	public static ImageDescriptor greenheart_icon;
@@ -70,6 +72,7 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		run_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
+		debug_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
 		run_ovr_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
 		greenheart_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
 		julaunch_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
@@ -140,16 +143,16 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
 	public static StatusLineItem getStatusLineItem() {
 		IStatusLineManager manager = getStatusLineManager();
-		StatusLineItem item = (StatusLineItem) manager.find("asdf");
+		StatusLineItem item = (StatusLineItem) manager.find(TEST_STATUS_LINE);
 
 		if (item == null)
-			item = addStatusBar();
+			item = addStatusLine();
 
 		return item;
 	}
 
-	public static StatusLineItem addStatusBar() {
-		StatusLineItem item = new StatusLineItem("asdf");
+	public static StatusLineItem addStatusLine() {
+		StatusLineItem item = new StatusLineItem(TEST_STATUS_LINE);
 		try {
 			getStatusLineManager().insertBefore("ElementState", item);
 		} catch (final IllegalArgumentException e) {

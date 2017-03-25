@@ -20,86 +20,70 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
+import com.github.pedrosans.launcherextension.toolbar.action.SetPreferedLaunchConfiguration;
 
 /**
  * @author Pedro Santos
  *
  */
-public class MenuContributions extends ArrayList<IContributionItem> {
+public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionItem> {
 
 	private static final long serialVersionUID = 1L;
 
 	private String prefered;
 	private boolean preferedeSlotNeedsSeparator;
-	private List<ILaunchConfiguration> favoriteLaunches;
-	private List<ILaunchConfiguration> lastLaunches;
+	private boolean historySeparator;
 
-	public MenuContributions(List<ILaunchConfiguration> favoriteLaunches, List<ILaunchConfiguration> lastLaunches) {
-		this(LauncherExtension.getDefault().getPreferedLanchConfiguration(), favoriteLaunches, lastLaunches);
+	public PreferedLaunchConfigurationOptions() {
+		this(LauncherExtension.getDefault().getPreferedLanchConfiguration());
 	}
 
-	public MenuContributions(String prefered, List<ILaunchConfiguration> favoriteLaunches,
-			List<ILaunchConfiguration> lastLaunches) {
+	public PreferedLaunchConfigurationOptions(String prefered) {
 		this.prefered = prefered;
-		this.favoriteLaunches = favoriteLaunches;
-		this.lastLaunches = lastLaunches;
 	}
 
-	public void populate() {
+	public PreferedLaunchConfigurationOptions populate(List<ILaunchConfiguration> favoriteLaunches,
+			List<ILaunchConfiguration> lastLaunches) {
 		for (ILaunchConfiguration conf : favoriteLaunches)
 			this.contribute(conf);
 
-		boolean historySeparator = false;
-
 		lastLaunches.removeAll(favoriteLaunches);
 
-		for (ILaunchConfiguration conf : lastLaunches) {
+		for (ILaunchConfiguration conf : lastLaunches)
+			contribute(conf);
 
-			if (conf.getName().equals(prefered) && !preferedeSlotNeedsSeparator) {
-
-				addPreferedConfiguration(conf);
-
-			} else {
-
-				if (!historySeparator) {
-					if (size() > 0)
-						add(new Separator());
-					historySeparator = true;
-					preferedeSlotNeedsSeparator = false;
-				}
-				contribute(conf);
-
-			}
-
-		}
+		return this;
 	}
 
 	private void contribute(ILaunchConfiguration conf) {
-		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf));
-		actionContribution.setVisible(true);
-		if (conf.getName().equals(prefered))
+
+		boolean preferedConfig = conf.getName().equals(prefered);
+
+		if (!preferedConfig && !historySeparator && size() > 0) {
+			add(new Separator());
+			historySeparator = true;
+			preferedeSlotNeedsSeparator = false;
+		}
+
+		if (preferedConfig)
 			addPreferedConfiguration(conf);
 		else
 			addConfiguration(conf);
 
 	}
 
-	protected Action newSetPreferedConfigAction(ILaunchConfiguration conf) {
-		return new SetPreference(conf);
-	}
-
 	private void addPreferedConfiguration(ILaunchConfiguration conf) {
 		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf));
 		actionContribution.setVisible(true);
+		actionContribution.getAction().setChecked(true);
 		actionContribution.getAction().setEnabled(false);
-		actionContribution.getAction().setText("Selected: " + actionContribution.getAction().getText());
+		actionContribution.getAction().setText(actionContribution.getAction().getText() + " (selected)");
 		this.add(0, actionContribution);
 		if (size() > 1)
 			this.add(1, new Separator());
@@ -118,20 +102,8 @@ public class MenuContributions extends ArrayList<IContributionItem> {
 		this.add(actionContribution);
 	}
 
-	static class SetPreference extends Action {
-
-		private ILaunchConfiguration configuration;
-
-		public SetPreference(ILaunchConfiguration configuration) {
-			this.configuration = configuration;
-			setText(configuration.getName());
-			setImageDescriptor(DebugUITools.getDefaultImageDescriptor(configuration));
-		}
-
-		@Override
-		public void run() {
-			LauncherExtension.getDefault().setPreferedLanchConfiguration(configuration.getName());
-		}
+	protected Action newSetPreferedConfigAction(ILaunchConfiguration conf) {
+		return new SetPreferedLaunchConfiguration(conf);
 	}
 
 }
