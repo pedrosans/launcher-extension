@@ -22,6 +22,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
@@ -33,7 +34,7 @@ import com.github.pedrosans.launcherextension.ManagedConfigurations;
 
 /**
  * @author Pedro Santos
- *
+ * 
  */
 public class CorrespondentTestLaunchHandler extends AbstractHandler {
 
@@ -50,7 +51,7 @@ public class CorrespondentTestLaunchHandler extends AbstractHandler {
 				IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
 				ILaunchConfiguration c = ManagedConfigurations.lookupTest(file);
 				if (c != null) {
-					c.launch(LauncherExtension.getDefault().getPreferedLaunchMode(), null);
+					DebugUITools.launch(c, LauncherExtension.getDefault().getPreferedLaunchMode());
 				} else {
 					Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
 					MessageDialog.openInformation(shell, "No test was launched",

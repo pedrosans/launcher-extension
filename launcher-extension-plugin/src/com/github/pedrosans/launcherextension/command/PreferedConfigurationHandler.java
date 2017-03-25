@@ -20,9 +20,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,7 +32,7 @@ import com.github.pedrosans.launcherextension.ManagedConfigurations;
  * @author Pedro Santos
  *
  */
-public class PreferedConfigurationHandler extends AbstractHandler implements  IExecutableExtension  {
+public class PreferedConfigurationHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -50,19 +49,13 @@ public class PreferedConfigurationHandler extends AbstractHandler implements  IE
 
 			ILaunchConfiguration config = ManagedConfigurations.lookup(preferedLanchConfiguration);
 
-			config.launch(LauncherExtension.getDefault().getPreferedLaunchMode(), null);
+			DebugUITools.launch(config, LauncherExtension.getDefault().getPreferedLaunchMode());
 
 		} catch (CoreException e) {
 			LauncherExtension.getDefault().getLog().log(e.getStatus());
 		}
 
 		return null;
-	}
-
-	@Override
-	public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
-			throws CoreException {
-		
 	}
 
 }
