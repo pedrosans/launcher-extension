@@ -16,38 +16,47 @@
  */
 package com.github.pedrosans.launcherextension.toolbar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.actions.CompoundContributionItem;
 
 import com.github.pedrosans.launcherextension.ManagedConfigurations;
+import com.github.pedrosans.launcherextension.toolbar.action.SetPreferedLaunchMode;
 
 /**
  * @author Pedro Santos
  *
  */
-public class PreferedConfigurationMenu extends CompoundContributionItem {
+public class PreferedLaunchMenu extends CompoundContributionItem {
 
-	public PreferedConfigurationMenu() {
+	public PreferedLaunchMenu() {
 	}
 
-	public PreferedConfigurationMenu(String id) {
+	public PreferedLaunchMenu(String id) {
 		super(id);
 	}
 
 	@Override
 	protected IContributionItem[] getContributionItems() {
 
+		List<IContributionItem> menu = new ArrayList<IContributionItem>();
+
+		menu.add(new ActionContributionItem(new SetPreferedLaunchMode(ILaunchManager.RUN_MODE)));
+		menu.add(new ActionContributionItem(new SetPreferedLaunchMode(ILaunchManager.DEBUG_MODE)));
+		menu.add(new Separator());
+
 		List<ILaunchConfiguration> favoriteLaunches = ManagedConfigurations.favoriteLaunches();
 		List<ILaunchConfiguration> lastLaunches = ManagedConfigurations.lastLaunches();
 
-		MenuContributions menuContributions = new MenuContributions(favoriteLaunches, lastLaunches);
+		menu.addAll(new PreferedLaunchConfigurationOptions().populate(favoriteLaunches, lastLaunches));
 
-		menuContributions.populate();
-
-		return menuContributions.toArray(new IContributionItem[0]);
+		return menu.toArray(new IContributionItem[0]);
 	}
 
 }

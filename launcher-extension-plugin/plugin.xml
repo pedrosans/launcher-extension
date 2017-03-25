@@ -79,7 +79,7 @@
             allPopups="false"
             locationURI="menu:com.github.pedrosans.launcherextension.command.launchPreferedConfiguration">
          <dynamic
-               class="com.github.pedrosans.launcherextension.toolbar.PreferedConfigurationMenu"
+               class="com.github.pedrosans.launcherextension.toolbar.PreferedLaunchMenu"
                id="com.github.pedrosans.launcherextension.toolbar.PreferedConfigurationMenu">
          </dynamic>
       </menuContribution>
