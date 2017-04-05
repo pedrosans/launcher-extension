@@ -32,16 +32,19 @@ import com.github.pedrosans.launcherextension.background.TestMonitor;
  */
 public class AutoLauncher {
 
+	private static final Status WARNING_STATUS = new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
+			"Auto test can't find a correpondent test for the changed class");
+
 	public static void launchTest(IResource resource) {
 		try {
-			ILaunchConfiguration configuration = ManagedConfigurations.lookupTest(resource);
+			ILaunchConfiguration configuration = ManagedConfigurations.getJUnitConfiguration(resource, true);
+
 			if (configuration == null) {
-				LauncherExtension.getDefault().getLog().log(new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
-						"Auto test can't find a correpondent test for the changed class"));
+				LauncherExtension.getDefault().getLog().log(WARNING_STATUS);
 				return;
 			}
 
-			new TestMonitor(configuration.getMappedResources()[0]).install();
+			new TestMonitor(resource, configuration.getMappedResources()[0]).install();
 
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 

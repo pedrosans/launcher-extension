@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -35,6 +36,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.github.pedrosans.launcherextension.autotest.ChangeListener;
+import com.github.pedrosans.launcherextension.background.CleanStatusLineListener;
 import com.github.pedrosans.launcherextension.background.ViewPartListener;
 import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
@@ -53,6 +55,7 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	public static ImageDescriptor run_ovr_icon;
 	public static ImageDescriptor julaunch_icon;
 	public static ImageDescriptor greenheart_icon;
+	static final String CLASS_NAME_VARIABLE = "{class_name}";
 
 	public LauncherExtension() {
 		instance = this;
@@ -66,16 +69,22 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	public void earlyStartup() {
 		LauncherExtension.getWorkbenchWindow(false).getActivePage().addPartListener(new ViewPartListener());
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
+		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(new CleanStatusLineListener());
 	}
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		run_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
-		debug_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
-		run_ovr_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
-		greenheart_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
-		julaunch_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
+		run_exc_icon = ImageDescriptor
+				.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
+		debug_exc_icon = ImageDescriptor
+				.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
+		run_ovr_icon = ImageDescriptor
+				.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
+		greenheart_icon = ImageDescriptor
+				.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
+		julaunch_icon = ImageDescriptor
+				.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
 
 	}
 

@@ -49,7 +49,7 @@ public class CorrespondentTestLaunchHandler extends AbstractHandler {
 		} else {
 			try {
 				IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
-				ILaunchConfiguration c = ManagedConfigurations.lookupTest(file);
+				ILaunchConfiguration c = ManagedConfigurations.getJUnitConfiguration(file, true);
 				if (c != null) {
 					DebugUITools.launch(c, LauncherExtension.getDefault().getPreferedLaunchMode());
 				} else {
