@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
@@ -44,15 +45,15 @@ public class ChangeListener implements IResourceChangeListener {
 		if (!LauncherExtension.getDefault().isAutoTesting())
 			return;
 
-		boolean workspaceLaunching = DebugPlugin.getDefault().getLaunchManager().getLaunches().length > 0;
 		boolean autoBuilt = ResourcesPlugin.getWorkspace().isAutoBuilding() && event.getBuildKind() == AUTO_BUILD;
 		boolean incremental = event.getBuildKind() == INCREMENTAL_BUILD;
 		boolean built = incremental || autoBuilt;
+		boolean isLaunching = false;
+		for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches())
+			isLaunching = isLaunching || !launched.isTerminated();
 
-		if (!built || workspaceLaunching || event.getDelta().getKind() != CHANGED){
-			System.out.println(workspaceLaunching);
+		if (isLaunching || !built || event.getDelta().getKind() != CHANGED)
 			return;
-		}
 
 		LeafsVisitor changedFiles = new LeafsVisitor();
 

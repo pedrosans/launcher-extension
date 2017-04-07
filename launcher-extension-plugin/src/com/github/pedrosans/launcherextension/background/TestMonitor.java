@@ -122,8 +122,6 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 		Result result = session.getTestResult(false);
 		if (result == Result.ERROR || result == Result.FAILURE)
 			statusLineItem.error(testedFile, "Test failed");
-		// else
-		// statusLineItem.remove(testedFile);
 
 		if (viewLayoutHijacker != null)
 			JUnitCorePlugin.getDefault().getNewTestRunListeners().add(viewLayoutHijacker);
@@ -190,7 +188,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	}
 
 	@Override
-	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult,
+			String actualResult) {
 
 	}
 
