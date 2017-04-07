@@ -122,8 +122,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 		Result result = session.getTestResult(false);
 		if (result == Result.ERROR || result == Result.FAILURE)
 			statusLineItem.error(testedFile, "Test failed");
-//		else
-//			statusLineItem.remove(testedFile);
+		// else
+		// statusLineItem.remove(testedFile);
 
 		if (viewLayoutHijacker != null)
 			JUnitCorePlugin.getDefault().getNewTestRunListeners().add(viewLayoutHijacker);
@@ -148,7 +148,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	@Override
 	public void runningBegins() {
-		flagViewToDontGetFocus();
+		if (LauncherExtension.getDefault().isSetToAutoRunTestsInBackground())
+			flagViewToDontGetFocus();
 	}
 
 	@Override

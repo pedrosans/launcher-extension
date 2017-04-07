@@ -48,6 +48,7 @@ import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
 public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
 	private static final String TEST_STATUS_LINE = "test.status.line";
+	public static final String CLASS_NAME_VARIABLE = "{class_name}";
 	private static LauncherExtension instance;
 	public static final String PLUGIN_ID = "launcher.extension";
 	public static ImageDescriptor run_exc_icon;
@@ -55,7 +56,6 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	public static ImageDescriptor run_ovr_icon;
 	public static ImageDescriptor julaunch_icon;
 	public static ImageDescriptor greenheart_icon;
-	static final String CLASS_NAME_VARIABLE = "{class_name}";
 
 	public LauncherExtension() {
 		instance = this;
@@ -75,16 +75,11 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		run_exc_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
-		debug_exc_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
-		run_ovr_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
-		greenheart_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
-		julaunch_icon = ImageDescriptor
-				.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
+		run_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
+		debug_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
+		run_ovr_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
+		greenheart_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/greenheart.png"), null));
+		julaunch_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/julaunch.png"), null));
 
 	}
 

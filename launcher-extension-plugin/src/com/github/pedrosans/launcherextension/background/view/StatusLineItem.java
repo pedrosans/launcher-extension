@@ -61,7 +61,7 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 
 	@Override
 	public void run() {
-		if (scheduledKey == null || label == null || label.isDisposed())
+		if (label == null || label.isDisposed())
 			return;
 
 		String info = infoMap.get(scheduledKey);
@@ -77,6 +77,10 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 
 		if (info == null && error == null)
 			label.setText(null);
+	}
+
+	public void bind(IResource testedFile, IResource testFile) {
+		testFileMap.put(keyFor(testedFile), testFile);
 	}
 
 	public void info(IResource resource, String info) {
@@ -95,23 +99,26 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
-	public void removeTestStatus(String className) {
+	public void removeTestStatus(String testClassName) {
 		String testedFileKey = null;
+		String testClassSimpleName = testClassName.substring(testClassName.lastIndexOf(".") + 1);
+
 		for (Map.Entry<String, IResource> e : testFileMap.entrySet()) {
-			if (e.getValue().getName().contains(className)) {
+			String mappedTestFileName = e.getValue().getName();
+			String mappedTestFileSimpleName = mappedTestFileName.split("\\.")[0];
+			if (mappedTestFileSimpleName.contains(testClassSimpleName))
 				testedFileKey = e.getKey();
-			}
 		}
-		if (testedFileKey != null) {
+
+		if (testedFileKey != null)
 			remove(testedFileKey);
-		}
 	}
 
 	public void remove(IResource testedFile) {
 		remove(keyFor(testedFile));
 	}
 
-	public void remove(String testedFileKey) {
+	private void remove(String testedFileKey) {
 		infoMap.remove(testedFileKey);
 		errorMap.remove(testedFileKey);
 		testFileMap.remove(testedFileKey);
@@ -124,11 +131,7 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 	}
 
 	String keyFor(IResource resource) {
-		return resource.getName().replace(resource.getFileExtension(), "");
-	}
-
-	public void bind(IResource testedFile, IResource testFile) {
-		testFileMap.put(keyFor(testedFile), testFile);
+		return resource.getName().replace(resource.getFileExtension(), "KEY");
 	}
 
 }

@@ -49,9 +49,9 @@ public class ManagedConfigurations {
 	/**
 	 * Correspondent test for this specific resource
 	 */
-	public static ILaunchConfiguration getJUnitConfiguration(IResource javaFile, boolean create) throws CoreException {
+	public static ILaunchConfiguration getJUnitConfiguration(IResource javaOrClassFile, boolean create) throws CoreException {
 		String classTestFilePattern = LauncherExtension.getDefault().getClassTestFilePattern();
-		String className = javaFile.getName().replace("." + javaFile.getFileExtension(), "");
+		String className = javaOrClassFile.getName().replace("." + javaOrClassFile.getFileExtension(), "");
 		String testClassName = classTestFilePattern.replace(LauncherExtension.CLASS_NAME_VARIABLE, className);
 
 		IJavaElement testElement = WorkbenchFiles.search(testClassName);
@@ -60,11 +60,11 @@ public class ManagedConfigurations {
 			return null;
 
 		ILaunchConfigurationWorkingCopy temporary = jUnitLaunchShortcut.createLaunchConfiguration(testElement);
-
-		List<ILaunchConfiguration> candidates = jUnitLaunchShortcut.findExistingLaunchConfigurations(temporary);
-		if (candidates.size() == 1)
-			return candidates.get(0);
-		if (candidates.isEmpty() && create)
+		List<ILaunchConfiguration> existing = jUnitLaunchShortcut.findExistingLaunchConfigurations(temporary);
+		
+		if (existing.size() == 1)
+			return existing.get(0);
+		if (existing.isEmpty() && create)
 			return temporary.doSave();
 		else
 			return null;

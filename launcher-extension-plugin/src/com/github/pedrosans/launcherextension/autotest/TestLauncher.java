@@ -19,8 +19,13 @@ package com.github.pedrosans.launcherextension.autotest;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 import com.github.pedrosans.launcherextension.ManagedConfigurations;
@@ -30,23 +35,43 @@ import com.github.pedrosans.launcherextension.background.TestMonitor;
  * @author Pedro Santos
  *
  */
-public class AutoLauncher {
+public class TestLauncher {
 
-	private static final Status WARNING_STATUS = new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
+	private static final Status NO_TEST = new Status(Status.WARNING, LauncherExtension.PLUGIN_ID,
 			"Auto test can't find a correpondent test for the changed class");
 
-	public static void launchTest(IResource resource) {
+	public static void testBuiltResourceInBackground(IResource resource) {
 		try {
 			ILaunchConfiguration configuration = ManagedConfigurations.getJUnitConfiguration(resource, true);
 
 			if (configuration == null) {
-				LauncherExtension.getDefault().getLog().log(WARNING_STATUS);
+				LauncherExtension.getDefault().getLog().log(NO_TEST);
 				return;
 			}
 
-			new TestMonitor(resource, configuration.getMappedResources()[0]).install();
+//			new TestMonitor(resource, configuration.getMappedResources()[0]).install();
 
-			configuration.launch(ILaunchManager.RUN_MODE, null);
+			ILaunch launch = configuration.launch(ILaunchManager.RUN_MODE, null);
+			System.out.println("launched"+ launch);
+
+			DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
+
+		} catch (CoreException e) {
+			LauncherExtension.getDefault().getLog().log(e.getStatus());
+		}
+	}
+
+	public static void testActiveResource(IResource resource) {
+		try {
+			ILaunchConfiguration c = ManagedConfigurations.getJUnitConfiguration(resource, true);
+
+			if (c == null) {
+				Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
+				MessageDialog.openInformation(shell, "No test was launched", "Can't find the correspondent test.");
+				return;
+			}
+
+			DebugUITools.launch(c, LauncherExtension.getDefault().getPreferedLaunchMode());
 
 		} catch (CoreException e) {
 			LauncherExtension.getDefault().getLog().log(e.getStatus());

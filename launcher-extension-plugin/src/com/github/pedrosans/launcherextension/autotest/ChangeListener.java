@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
@@ -43,14 +44,17 @@ public class ChangeListener implements IResourceChangeListener {
 		if (!LauncherExtension.getDefault().isAutoTesting())
 			return;
 
+		boolean workspaceLaunching = DebugPlugin.getDefault().getLaunchManager().getLaunches().length > 0;
 		boolean autoBuilt = ResourcesPlugin.getWorkspace().isAutoBuilding() && event.getBuildKind() == AUTO_BUILD;
 		boolean incremental = event.getBuildKind() == INCREMENTAL_BUILD;
 		boolean built = incremental || autoBuilt;
 
-		if (!built || event.getDelta().getKind() != CHANGED)
+		if (!built || workspaceLaunching || event.getDelta().getKind() != CHANGED){
+			System.out.println(workspaceLaunching);
 			return;
+		}
 
-		Leafs changedFiles = new Leafs();
+		LeafsVisitor changedFiles = new LeafsVisitor();
 
 		try {
 			event.getDelta().accept(changedFiles, false);
@@ -59,21 +63,19 @@ public class ChangeListener implements IResourceChangeListener {
 		}
 
 		if (changedFiles.size() == 1)
-			AutoLauncher.launchTest(changedFiles.get(0));
+			TestLauncher.testBuiltResourceInBackground(changedFiles.get(0));
 
 	}
 
-	static class Leafs extends ArrayList<IResource> implements IResourceDeltaVisitor {
+	static class LeafsVisitor extends ArrayList<IResource> implements IResourceDeltaVisitor {
 		private static final String INNER_CLASS_NAME_SEPARATOR = "$";
 		private static final String CLASS = "class";
 		private static final long serialVersionUID = 1L;
 
 		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
-			if (
-					CLASS.equals(delta.getResource().getFileExtension())
-					&& !delta.getResource().getName().contains(INNER_CLASS_NAME_SEPARATOR)
-			) {
+			if (CLASS.equals(delta.getResource().getFileExtension())
+					&& !delta.getResource().getName().contains(INNER_CLASS_NAME_SEPARATOR)) {
 				add(delta.getResource());
 			}
 			return true;
