@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
@@ -46,11 +48,14 @@ public class ChangeListener implements IResourceChangeListener {
 		boolean autoBuilt = ResourcesPlugin.getWorkspace().isAutoBuilding() && event.getBuildKind() == AUTO_BUILD;
 		boolean incremental = event.getBuildKind() == INCREMENTAL_BUILD;
 		boolean built = incremental || autoBuilt;
+		boolean isLaunching = false;
+		for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches())
+			isLaunching = isLaunching || !launched.isTerminated();
 
-		if (!built || event.getDelta().getKind() != CHANGED)
+		if (isLaunching || !built || event.getDelta().getKind() != CHANGED)
 			return;
 
-		Leafs changedFiles = new Leafs();
+		LeafsVisitor changedFiles = new LeafsVisitor();
 
 		try {
 			event.getDelta().accept(changedFiles, false);
@@ -59,11 +64,11 @@ public class ChangeListener implements IResourceChangeListener {
 		}
 
 		if (changedFiles.size() == 1)
-			AutoLauncher.launchTest(changedFiles.get(0));
+			TestLauncher.testBuiltResourceInBackground(changedFiles.get(0));
 
 	}
 
-	static class Leafs extends ArrayList<IResource> implements IResourceDeltaVisitor {
+	static class LeafsVisitor extends ArrayList<IResource> implements IResourceDeltaVisitor {
 		private static final String INNER_CLASS_NAME_SEPARATOR = "$";
 		private static final String CLASS = "class";
 		private static final long serialVersionUID = 1L;
