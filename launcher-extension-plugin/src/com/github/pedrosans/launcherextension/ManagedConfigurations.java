@@ -20,22 +20,23 @@ import static org.eclipse.debug.ui.IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
 import static org.eclipse.debug.ui.IDebugUIConstants.ID_RUN_LAUNCH_GROUP;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationManager;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchGroupExtension;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchHistory;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.core.IJavaElement;
+
+import com.github.pedrosans.launcherextension.junit.WorkableJUnitLaunchShortcut;
+import com.github.pedrosans.launcherextension.workspace.WorkspaceFiles;
 
 /**
  * @author Pedro Santos
@@ -43,56 +44,30 @@ import org.eclipse.debug.ui.IDebugUIConstants;
  */
 public class ManagedConfigurations {
 
+	private static WorkableJUnitLaunchShortcut jUnitLaunchShortcut = new WorkableJUnitLaunchShortcut();
+
 	/**
 	 * Correspondent test for this specific resource
 	 */
-	public static ILaunchConfiguration lookupTest(IResource resource) throws CoreException {
-
+	public static ILaunchConfiguration getTestConfiguration(IResource javaOrClassFile, boolean create) throws CoreException {
 		String classTestFilePattern = LauncherExtension.getDefault().getClassTestFilePattern();
-		String testName = classTestFilePattern.replace("{class_name}", resource.getName());
+		String className = javaOrClassFile.getName().replace("." + javaOrClassFile.getFileExtension(), "");
+		String testClassName = classTestFilePattern.replace(LauncherExtension.CLASS_NAME_VARIABLE, className);
 
-		Set<ILaunchConfiguration> result = lookup(resource.getProject(), testName, resource.getFileExtension());
+		IJavaElement testElement = WorkspaceFiles.search(testClassName);
 
-		for (Iterator<ILaunchConfiguration> i = result.iterator(); i.hasNext();) {
-			ILaunchConfiguration configuration = i.next();
-			if (configuration.getType().getIdentifier().contains("junit") == false)
-				i.remove();
-			if (configuration.getAttribute("org.eclipse.jdt.junit.TESTNAME", "").isEmpty() == false)
-				i.remove();
-		}
-		if (result.size() == 1)
-			return result.iterator().next();
+		if (testElement == null)
+			return null;
+
+		ILaunchConfigurationWorkingCopy temporary = jUnitLaunchShortcut.createLaunchConfiguration(testElement);
+		List<ILaunchConfiguration> template = jUnitLaunchShortcut.findExistingLaunchConfigurations(temporary);
+		
+		if (template.size() == 1)
+			return template.get(0);
+		if (template.isEmpty() && create)
+			return temporary.doSave();
 		else
 			return null;
-	}
-
-	public static Set<ILaunchConfiguration> lookup(IProject project, String fileName, String fileExtension) throws CoreException {
-
-		Set<ILaunchConfiguration> result = new HashSet<>();
-
-		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfiguration[] configurations = manager.getLaunchConfigurations();
-		for (int i = 0; i < configurations.length; i++) {
-			ILaunchConfiguration configuration = configurations[i];
-
-			if (configuration.getMappedResources() == null)
-				continue;
-
-			for (IResource configuredResource : configuration.getMappedResources()) {
-
-				if (configuredResource.getFileExtension() == null)
-					continue;
-
-				String confName = configuredResource.getName().replace(configuredResource.getFileExtension(), "").replace(".", "");
-				String name = fileName.replace(fileExtension, "").replace(".", "");
-
-				if (configuredResource.getProject().equals(project) && confName.contains(name))
-					result.add(configuration);
-
-			}
-		}
-
-		return result;
 	}
 
 	public static ILaunchConfiguration lookup(String preferedLanchConfiguration) throws CoreException {
@@ -112,10 +87,11 @@ public class ManagedConfigurations {
 
 		List<ILaunchConfiguration> lastLaunches = new ArrayList<ILaunchConfiguration>();
 
-		LaunchConfigurationManager launchConfigurationManager = DebugUIPlugin.getDefault().getLaunchConfigurationManager();
-		LaunchGroupExtension fGroup = launchConfigurationManager.getLaunchGroup(IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+		LaunchConfigurationManager manager = DebugUIPlugin.getDefault().getLaunchConfigurationManager();
 
-		LaunchHistory launchHistory = launchConfigurationManager.getLaunchHistory(fGroup.getIdentifier());
+		LaunchGroupExtension fGroup = manager.getLaunchGroup(IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+
+		LaunchHistory launchHistory = manager.getLaunchHistory(fGroup.getIdentifier());
 		for (ILaunchConfiguration launchConfiguration : launchHistory.getHistory()) {
 			lastLaunches.add(launchConfiguration);
 		}
