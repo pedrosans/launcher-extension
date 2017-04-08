@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.jdt.launching,
  org.eclipse.ui.ide,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
- org.eclipse.jdt.ui
+ org.eclipse.jdt.ui,
+ org.eclipse.jdt.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.github.pedrosans.launcherextension.LauncherExtension
 Bundle-ActivationPolicy: lazy
