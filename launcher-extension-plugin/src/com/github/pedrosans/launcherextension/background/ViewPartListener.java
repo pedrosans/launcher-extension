@@ -16,9 +16,6 @@
  */
 package com.github.pedrosans.launcherextension.background;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
@@ -26,7 +23,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
-import com.github.pedrosans.launcherextension.ManagedConfigurations;
+import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 
 /**
  * @author Pedro Santos
@@ -36,17 +33,13 @@ public class ViewPartListener implements IPartListener2 {
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
-		try {
-			IWorkbenchPart editor = partRef.getPart(false);
-			if (editor instanceof CompilationUnitEditor) {
-				IFileEditorInput editorInput = (IFileEditorInput) ((CompilationUnitEditor) editor).getEditorInput();
-				IFile resource = editorInput.getFile();
-				ILaunchConfiguration test = ManagedConfigurations.lookupTest(resource);
-				if (test != null)
-					LauncherExtension.getStatusLineItem().update(test.getMappedResources()[0]);
-			}
-		} catch (CoreException e) {
-			LauncherExtension.getDefault().getLog().log(e.getStatus());
+		IWorkbenchPart editor = partRef.getPart(false);
+		StatusLineItem statusLineItem = LauncherExtension.getStatusLineItem();
+		if (editor instanceof CompilationUnitEditor) {
+			IFileEditorInput editorInput = (IFileEditorInput) ((CompilationUnitEditor) editor).getEditorInput();
+			statusLineItem.show(editorInput.getFile());
+		} else {
+			statusLineItem.cleanView();
 		}
 	}
 

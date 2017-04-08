@@ -40,7 +40,8 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 	private static Color black = new Color(LauncherExtension.getDisplay(), 0, 0, 0);
 	private Map<String, String> infoMap = new HashMap<>();
 	private Map<String, String> errorMap = new HashMap<>();
-	private IResource scheduled;
+	private Map<String, IResource> testFileMap = new HashMap<>();
+	private String scheduledKey;
 
 	public StatusLineItem(String id) {
 		super(id);
@@ -60,45 +61,77 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 
 	@Override
 	public void run() {
-		if (scheduled == null || label == null || label.isDisposed())
+		if (label == null || label.isDisposed())
 			return;
-		String info = infoMap.get(scheduled.getFullPath().toString());
+
+		String info = infoMap.get(scheduledKey);
 		if (info != null) {
 			label.setText(info);
 			label.setForeground(black);
 		}
-		String error = errorMap.get(scheduled.getFullPath().toString());
+		String error = errorMap.get(scheduledKey);
 		if (error != null) {
 			label.setText(error);
 			label.setForeground(red);
 		}
+
 		if (info == null && error == null)
 			label.setText(null);
-		scheduled = null;
+	}
+
+	public void bind(IResource testedFile, IResource testFile) {
+		testFileMap.put(keyFor(testedFile), testFile);
 	}
 
 	public void info(IResource resource, String info) {
-		infoMap.put(resource.getFullPath().toString(), info);
-		scheduled = resource;
+		infoMap.put(scheduledKey = keyFor(resource), info);
 		if (label != null && !label.isDisposed())
 			LauncherExtension.getDisplay().asyncExec(this);
 	}
 
 	public void error(IResource resource, String error) {
-		errorMap.put(resource.getFullPath().toString(), error);
-		scheduled = resource;
+		errorMap.put(scheduledKey = keyFor(resource), error);
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
-	public void update(IResource resource) {
-		scheduled = resource;
+	public void show(IResource resource) {
+		scheduledKey = keyFor(resource);
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
-	public void clean(IResource resource) {
-		infoMap.remove(resource.getFullPath().toString());
-		errorMap.remove(resource.getFullPath().toString());
-		scheduled = resource;
+	public void removeTestStatus(String testClassName) {
+		String testedFileKey = null;
+		String testClassSimpleName = testClassName.substring(testClassName.lastIndexOf(".") + 1);
+
+		for (Map.Entry<String, IResource> e : testFileMap.entrySet()) {
+			String mappedTestFileName = e.getValue().getName();
+			String mappedTestFileSimpleName = mappedTestFileName.split("\\.")[0];
+			if (mappedTestFileSimpleName.contains(testClassSimpleName))
+				testedFileKey = e.getKey();
+		}
+
+		if (testedFileKey != null)
+			remove(testedFileKey);
+	}
+
+	public void remove(IResource testedFile) {
+		remove(keyFor(testedFile));
+	}
+
+	private void remove(String testedFileKey) {
+		infoMap.remove(testedFileKey);
+		errorMap.remove(testedFileKey);
+		testFileMap.remove(testedFileKey);
+		cleanView();
+	}
+
+	public void cleanView() {
+		scheduledKey = null;
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
+
+	String keyFor(IResource resource) {
+		return resource.getName().replace(resource.getFileExtension(), "KEY");
+	}
+
 }

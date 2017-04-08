@@ -16,6 +16,8 @@
  */
 package com.github.pedrosans.launcherextension.background;
 
+import static java.lang.String.format;
+
 import java.lang.reflect.Field;
 
 import org.eclipse.core.resources.IResource;
@@ -31,13 +33,17 @@ import org.eclipse.jdt.internal.junit.ui.UITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.ui.PlatformUI;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
+import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 
 /**
- * This run won't show even in Test Run History session if in background
+ * Test run monitor, it installs necessary listeners and keep the run in
+ * background and to report it at the status line bar.
+ * 
+ * If configured, this run won't show even in Test Run History
  * 
  * @author Pedro Santos
  * 
@@ -49,11 +55,13 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	private int size;
 	private int completed;
+	private IResource testedFile;
 	private IResource testFile;
+	private StatusLineItem statusLineItem;
 
-	public TestMonitor(IResource testFile) {
+	public TestMonitor(IResource testedFile, IResource testFile) {
+		this.testedFile = testedFile;
 		this.testFile = testFile;
-
 	}
 
 	public void install() {
@@ -77,15 +85,11 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 		}
 	}
 
-	private void showProgress() {
-		String progress = String.format("Testing %2.0f%%", (float) completed / size * 100);
-		LauncherExtension.getStatusLineItem().info(testFile, progress);
-	}
-
 	// Runnable
 	@Override
 	public void run() {
 		junitView = LauncherExtension.getJunitView(false);
+		statusLineItem = LauncherExtension.getStatusLineItem();
 	}
 
 	// ITestRunSessionListener
@@ -108,7 +112,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	@Override
 	public void sessionStarted(ITestRunSession session) {
-		LauncherExtension.getStatusLineItem().info(testFile, "Testing 1%");
+		statusLineItem.bind(testedFile, testFile);
+		statusLineItem.info(testedFile, "Testing 1%");
 	}
 
 	@Override
@@ -116,9 +121,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 		Result result = session.getTestResult(false);
 		if (result == Result.ERROR || result == Result.FAILURE)
-			LauncherExtension.getStatusLineItem().error(testFile, "Test failed");
-		else
-			LauncherExtension.getStatusLineItem().clean(testFile);
+			statusLineItem.error(testedFile, "Test failed");
 
 		if (viewLayoutHijacker != null)
 			JUnitCorePlugin.getDefault().getNewTestRunListeners().add(viewLayoutHijacker);
@@ -143,7 +146,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	@Override
 	public void runningBegins() {
-		flagViewToDontGetFocus();
+		if (LauncherExtension.getDefault().isSetToAutoRunTestsInBackground())
+			flagViewToDontGetFocus();
 	}
 
 	@Override
@@ -175,7 +179,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	public void testEnded(TestCaseElement testCaseElement) {
 		completed++;
 		if (completed < size)
-			showProgress();
+			statusLineItem.info(testedFile, format("Testing %2.0f%%", (float) completed / size * 100));
 	}
 
 	@Override
@@ -184,7 +188,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	}
 
 	@Override
-	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult,
+			String actualResult) {
 
 	}
 
@@ -213,10 +218,9 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 		return null;
 	}
 
-	/**
+	/*
 	 * Relies on the referenced view since it's called in the test listener
 	 * thread.
-	 * 
 	 */
 	private void flagViewToDontGetFocus() {
 		if (junitView != null) {

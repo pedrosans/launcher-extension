@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -35,6 +36,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.github.pedrosans.launcherextension.autotest.ChangeListener;
+import com.github.pedrosans.launcherextension.background.CleanStatusLineListener;
 import com.github.pedrosans.launcherextension.background.ViewPartListener;
 import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
@@ -46,6 +48,7 @@ import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
 public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
 	private static final String TEST_STATUS_LINE = "test.status.line";
+	public static final String CLASS_NAME_VARIABLE = "{class_name}";
 	private static LauncherExtension instance;
 	public static final String PLUGIN_ID = "launcher.extension";
 	public static ImageDescriptor run_exc_icon;
@@ -66,6 +69,7 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	public void earlyStartup() {
 		LauncherExtension.getWorkbenchWindow(false).getActivePage().addPartListener(new ViewPartListener());
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
+		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(new CleanStatusLineListener());
 	}
 
 	@Override
