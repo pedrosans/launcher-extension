@@ -20,9 +20,6 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
@@ -30,7 +27,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
-import com.github.pedrosans.launcherextension.ManagedConfigurations;
+import com.github.pedrosans.launcherextension.autotest.TestLauncher;
 
 /**
  * @author Pedro Santos
@@ -47,20 +44,8 @@ public class CorrespondentTestLaunchHandler extends AbstractHandler {
 			MessageDialog.openInformation(shell, "No test was launched", "No file editor.");
 			return null;
 		} else {
-			try {
-				IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
-				ILaunchConfiguration c = ManagedConfigurations.lookupTest(file);
-				if (c != null) {
-					DebugUITools.launch(c, LauncherExtension.getDefault().getPreferedLaunchMode());
-				} else {
-					Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
-					MessageDialog.openInformation(shell, "No test was launched",
-							"Can't find a launch configuration with a test for the current file.");
-					return null;
-				}
-			} catch (CoreException e) {
-				LauncherExtension.getDefault().getLog().log(e.getStatus());
-			}
+			IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
+			TestLauncher.testActiveResource(file);
 		}
 		return null;
 	}
