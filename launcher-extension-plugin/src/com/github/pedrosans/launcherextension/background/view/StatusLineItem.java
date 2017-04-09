@@ -36,8 +36,8 @@ import com.github.pedrosans.launcherextension.LauncherExtension;
  */
 public class StatusLineItem extends ContributionItem implements Runnable {
 	private CLabel label;
-	private static Color red = new Color(LauncherExtension.getDisplay(), 255, 0, 0);
-	private static Color black = new Color(LauncherExtension.getDisplay(), 0, 0, 0);
+	private static Color RED = new Color(LauncherExtension.getDisplay(), 255, 0, 0);
+	private static Color BLACK = new Color(LauncherExtension.getDisplay(), 0, 0, 0);
 	private Map<String, String> infoMap = new HashMap<>();
 	private Map<String, String> errorMap = new HashMap<>();
 	private Map<String, IResource> testFileMap = new HashMap<>();
@@ -67,12 +67,12 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 		String info = infoMap.get(scheduledKey);
 		if (info != null) {
 			label.setText(info);
-			label.setForeground(black);
+			label.setForeground(BLACK);
 		}
 		String error = errorMap.get(scheduledKey);
 		if (error != null) {
 			label.setText(error);
-			label.setForeground(red);
+			label.setForeground(RED);
 		}
 
 		if (info == null && error == null)
@@ -83,19 +83,19 @@ public class StatusLineItem extends ContributionItem implements Runnable {
 		testFileMap.put(keyFor(testedFile), testFile);
 	}
 
-	public void info(IResource resource, String info) {
-		infoMap.put(scheduledKey = keyFor(resource), info);
+	public void info(IResource testedFile, String info) {
+		infoMap.put(scheduledKey = keyFor(testedFile), info);
 		if (label != null && !label.isDisposed())
 			LauncherExtension.getDisplay().asyncExec(this);
 	}
 
-	public void error(IResource resource, String error) {
-		errorMap.put(scheduledKey = keyFor(resource), error);
+	public void error(IResource testedFile, String error) {
+		errorMap.put(scheduledKey = keyFor(testedFile), error);
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
-	public void show(IResource resource) {
-		scheduledKey = keyFor(resource);
+	public void show(IResource testedFile) {
+		scheduledKey = keyFor(testedFile);
 		LauncherExtension.getDisplay().asyncExec(this);
 	}
 
