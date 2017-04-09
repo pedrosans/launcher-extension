@@ -31,6 +31,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 
@@ -48,24 +49,28 @@ public class ChangeListener implements IResourceChangeListener {
 		boolean autoBuilt = ResourcesPlugin.getWorkspace().isAutoBuilding() && event.getBuildKind() == AUTO_BUILD;
 		boolean incremental = event.getBuildKind() == INCREMENTAL_BUILD;
 		boolean built = incremental || autoBuilt;
-		boolean isLaunching = false;
-		for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches())
-			isLaunching = isLaunching || !launched.isTerminated();
-
-		if (isLaunching || !built || event.getDelta().getKind() != CHANGED)
-			return;
-
-		LeafsVisitor changedFiles = new LeafsVisitor();
-
+		boolean hasJunitAppIsRunning = false;
 		try {
+			for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
+				boolean isJunitApp = launched.getLaunchConfiguration().getType().getIdentifier()
+						.contains(JUnitLaunchConfigurationConstants.ID_JUNIT_APPLICATION);
+
+				hasJunitAppIsRunning = hasJunitAppIsRunning || (!launched.isTerminated() && isJunitApp);
+			}
+
+			if (hasJunitAppIsRunning || !built || event.getDelta().getKind() != CHANGED)
+				return;
+
+			LeafsVisitor changedFiles = new LeafsVisitor();
+
 			event.getDelta().accept(changedFiles, false);
+
+			if (changedFiles.size() == 1)
+				TestLauncher.testBuiltResourceInBackground(changedFiles.get(0));
+
 		} catch (CoreException e) {
 			LauncherExtension.getDefault().getLog().log(e.getStatus());
 		}
-
-		if (changedFiles.size() == 1)
-			TestLauncher.testBuiltResourceInBackground(changedFiles.get(0));
-
 	}
 
 	static class LeafsVisitor extends ArrayList<IResource> implements IResourceDeltaVisitor {
@@ -75,10 +80,8 @@ public class ChangeListener implements IResourceChangeListener {
 
 		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
-			if (
-					CLASS.equals(delta.getResource().getFileExtension())
-					&& !delta.getResource().getName().contains(INNER_CLASS_NAME_SEPARATOR)
-			) {
+			if (CLASS.equals(delta.getResource().getFileExtension())
+					&& !delta.getResource().getName().contains(INNER_CLASS_NAME_SEPARATOR)) {
 				add(delta.getResource());
 			}
 			return true;

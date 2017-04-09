@@ -45,14 +45,12 @@ public class WorkableJUnitLaunchShortcut extends JUnitLaunchShortcut {
 		ILaunchConfigurationType configType = temporary.getType();
 
 		ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(configType);
-		String[] attributeToCompare = getAttributeNamesToCompare();
-
 		ArrayList<ILaunchConfiguration> candidateConfigs = new ArrayList<>(configs.length);
-		for (ILaunchConfiguration config : configs) {
-			if (hasSameAttributes(config, temporary, attributeToCompare)) {
+
+		for (ILaunchConfiguration config : configs)
+			if (hasSameAttributes(config, temporary, getAttributeNamesToCompare()))
 				candidateConfigs.add(config);
-			}
-		}
+
 		return candidateConfigs;
 	}
 
