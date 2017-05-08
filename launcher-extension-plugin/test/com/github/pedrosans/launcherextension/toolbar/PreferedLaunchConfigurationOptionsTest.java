@@ -17,7 +17,6 @@
 package com.github.pedrosans.launcherextension.toolbar;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -28,7 +27,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.Separator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,83 +77,74 @@ public class PreferedLaunchConfigurationOptionsTest {
 	}
 
 	@Test
-	public void separatesFavoritesFromHistoricalLaunches() throws Exception {
+	public void ordersFavoritesBeforeHistoricalLaunches() throws Exception {
 		fav.add(test01);
 		last.add(test02);
 
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(3));
+		assertThat(menuContributions.size(), is(2));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(test01)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test02)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test02)));
 	}
 
 	@Test
-	public void separatesPreferedFromHistoricalLaunches() throws Exception {
+	public void ordersPreferedBeforeHistoricalLaunches() throws Exception {
 		last.add(coreApp);
 		last.add(test01);
 
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(3));
+		assertThat(menuContributions.size(), is(2));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(coreApp)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test01)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test01)));
 	}
 
 	@Test
-	public void separatesPreferedFromFavoriteLaunches() throws Exception {
+	public void ordersPreferedAfterFavoriteLaunches() throws Exception {
 		fav.add(coreApp);
 		fav.add(test01);
 
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(3));
+		assertThat(menuContributions.size(), is(2));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(coreApp)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test01)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test01)));
 	}
 
 	@Test
-	public void separatesFavoritePreferedFromHistoricalLaunches() throws Exception {
+	public void ordersFavoritePreferedBeforeHistoricalLaunches() throws Exception {
 		fav.add(coreApp);
 		last.add(test01);
 
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(3));
+		assertThat(menuContributions.size(), is(2));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(coreApp)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test01)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test01)));
 	}
 
 	@Test
-	public void separatesHistoricalPreferedFromFavoriteLaunches() throws Exception {
+	public void ordersHistoricalPreferedFromFavoriteLaunches() throws Exception {
 		last.add(coreApp);
 		fav.add(test01);
 
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(3));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(coreApp)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test01)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test01)));
 	}
 
 	@Test
-	public void separatesPreferedFavoriteAndHistorical() throws Exception {
+	public void ordersPreferedFavoriteAndHistorical() throws Exception {
 		last.add(coreApp);
 		fav.add(test01);
 		last.add(test02);
 		menuContributions.populate(fav, last);
 
-		assertThat(menuContributions.size(), is(5));
 		assertThat(menuContributions.get(0), equalTo(aSetAction(coreApp)));
-		assertThat(menuContributions.get(1), instanceOf(Separator.class));
-		assertThat(menuContributions.get(2), equalTo(aSetAction(test01)));
-		assertThat(menuContributions.get(3), instanceOf(Separator.class));
-		assertThat(menuContributions.get(4), equalTo(aSetAction(test02)));
+		assertThat(menuContributions.get(1), equalTo(aSetAction(test01)));
+		assertThat(menuContributions.get(2), equalTo(aSetAction(test02)));
 	}
 
 	private IContributionItem aSetAction(StubConfig config) {

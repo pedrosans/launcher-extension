@@ -37,8 +37,6 @@ public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionI
 	private static final long serialVersionUID = 1L;
 
 	private String prefered;
-	private boolean preferedeSlotNeedsSeparator;
-	private boolean historySeparator;
 
 	public PreferedLaunchConfigurationOptions() {
 		this(LauncherExtension.getDefault().getPreferedLanchConfiguration());
@@ -51,30 +49,24 @@ public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionI
 	public PreferedLaunchConfigurationOptions populate(List<ILaunchConfiguration> favoriteLaunches,
 			List<ILaunchConfiguration> lastLaunches) {
 		for (ILaunchConfiguration conf : favoriteLaunches)
-			this.contribute(conf);
+			this.contribute(conf, "*");
 
 		lastLaunches.removeAll(favoriteLaunches);
 
 		for (ILaunchConfiguration conf : lastLaunches)
-			contribute(conf);
+			contribute(conf, "");
 
 		return this;
 	}
 
-	private void contribute(ILaunchConfiguration conf) {
+	private void contribute(ILaunchConfiguration conf, String sufix) {
 
 		boolean preferedConfig = conf.getName().equals(prefered);
-
-		if (!preferedConfig && !historySeparator && size() > 0) {
-			add(new Separator());
-			historySeparator = true;
-			preferedeSlotNeedsSeparator = false;
-		}
 
 		if (preferedConfig)
 			addPreferedConfiguration(conf);
 		else
-			addConfiguration(conf);
+			addConfiguration(conf, sufix);
 
 	}
 
@@ -85,19 +77,11 @@ public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionI
 		actionContribution.getAction().setEnabled(false);
 		actionContribution.getAction().setText(actionContribution.getAction().getText() + " (selected)");
 		this.add(0, actionContribution);
-		if (size() > 1)
-			this.add(1, new Separator());
-		else
-			preferedeSlotNeedsSeparator = true;
 	}
 
-	private void addConfiguration(ILaunchConfiguration conf) {
-		if (preferedeSlotNeedsSeparator) {
-			this.add(1, new Separator());
-			preferedeSlotNeedsSeparator = false;
-		}
-
+	private void addConfiguration(ILaunchConfiguration conf, String sufix) {
 		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf));
+		actionContribution.getAction().setText(actionContribution.getAction().getText() + sufix);
 		actionContribution.setVisible(true);
 		this.add(actionContribution);
 	}
