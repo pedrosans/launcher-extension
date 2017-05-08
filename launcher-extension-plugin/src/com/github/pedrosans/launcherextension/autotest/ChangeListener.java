@@ -31,6 +31,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
@@ -49,28 +50,49 @@ public class ChangeListener implements IResourceChangeListener {
 		boolean autoBuilt = ResourcesPlugin.getWorkspace().isAutoBuilding() && event.getBuildKind() == AUTO_BUILD;
 		boolean incremental = event.getBuildKind() == INCREMENTAL_BUILD;
 		boolean built = incremental || autoBuilt;
-		boolean hasJunitAppIsRunning = false;
+		boolean hasConflict = false;
 		try {
 			for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
-				boolean isJunitApp = launched.getLaunchConfiguration().getType().getIdentifier()
+				ILaunchConfiguration launchedConfig = launched.getLaunchConfiguration();
+
+				// if the user already choose which test to run
+				boolean isJunitApp = launchedConfig.getType().getIdentifier()
 						.contains(JUnitLaunchConfigurationConstants.ID_JUNIT_APPLICATION);
 
-				hasJunitAppIsRunning = hasJunitAppIsRunning || (!launched.isTerminated() && isJunitApp);
+				hasConflict = hasConflict || (!launched.isTerminated() && isJunitApp);
 			}
 
-			if (hasJunitAppIsRunning || !built || event.getDelta().getKind() != CHANGED)
+			if (hasConflict || !built || event.getDelta().getKind() != CHANGED)
 				return;
 
 			LeafsVisitor changedFiles = new LeafsVisitor();
 
 			event.getDelta().accept(changedFiles, false);
 
-			if (changedFiles.size() == 1)
-				TestLauncher.testBuiltResourceInBackground(changedFiles.get(0));
+			if (changedFiles.size() == 1) {
+				IResource changed = changedFiles.get(0);
+
+				if (isBuildingDueLaunchedResource(changed))
+					return;
+
+				TestLauncher.testBuiltResourceInBackground(changed);
+			}
 
 		} catch (CoreException e) {
 			LauncherExtension.getDefault().getLog().log(e.getStatus());
 		}
+	}
+
+	private boolean isBuildingDueLaunchedResource(IResource changed) throws CoreException {
+		String changedId = changed.getName().replace(changed.getFileExtension(), "");
+		for (ILaunch launched : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
+			for (IResource resource : launched.getLaunchConfiguration().getMappedResources()) {
+				String resourceId = resource.getName().replace(resource.getFileExtension(), "");
+				if (resourceId.equals(changedId))
+					return true;
+			}
+		}
+		return false;
 	}
 
 	static class LeafsVisitor extends ArrayList<IResource> implements IResourceDeltaVisitor {

@@ -39,8 +39,7 @@ public class PreferedConfigurationHandler extends AbstractHandler {
 		String preferedLanchConfiguration = LauncherExtension.getDefault().getPreferedLanchConfiguration();
 
 		if (preferedLanchConfiguration == null || preferedLanchConfiguration.trim().isEmpty()) {
-			Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
-			MessageDialog.openInformation(shell, "No prefered configuration was launched",
+			reportNoLaunch(
 					"There is no launch configuration set as prefered.\r\n\r\nChoose one from the prefered launch button pulldown in the toolbar.");
 			return null;
 		}
@@ -48,6 +47,10 @@ public class PreferedConfigurationHandler extends AbstractHandler {
 		try {
 
 			ILaunchConfiguration config = ManagedConfigurations.lookup(preferedLanchConfiguration);
+			if (config == null) {
+				reportNoLaunch("The selected launch configuration doesn't exist anymore.");
+				return null;
+			}
 
 			DebugUITools.launch(config, LauncherExtension.getDefault().getPreferedLaunchMode());
 
@@ -56,6 +59,11 @@ public class PreferedConfigurationHandler extends AbstractHandler {
 		}
 
 		return null;
+	}
+
+	void reportNoLaunch(String msg) {
+		Shell shell = LauncherExtension.getWorkbenchWindow().getShell();
+		MessageDialog.openInformation(shell, "No prefered configuration was launched", msg);
 	}
 
 }
