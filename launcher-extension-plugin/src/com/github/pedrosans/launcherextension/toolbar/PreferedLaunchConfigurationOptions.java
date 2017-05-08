@@ -23,7 +23,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.Separator;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
 import com.github.pedrosans.launcherextension.toolbar.action.SetPreferedLaunchConfiguration;
