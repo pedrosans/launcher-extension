@@ -37,6 +37,9 @@ public class CleanStatusLineListener extends TestRunListener {
 	public void sessionFinished(ITestRunSession session) {
 		StatusLineItem statusLineItem = LauncherExtension.getStatusLineItem();
 
+		if (statusLineItem == null)
+			return;
+
 		for (ITestElement testElement : session.getChildren()) {
 			if (testElement instanceof TestSuiteElement) {
 				TestSuiteElement testSuiteElement = (TestSuiteElement) testElement;

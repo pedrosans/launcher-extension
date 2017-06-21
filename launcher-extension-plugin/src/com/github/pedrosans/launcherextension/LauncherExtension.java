@@ -147,6 +147,10 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
 	public static StatusLineItem getStatusLineItem() {
 		IStatusLineManager manager = getStatusLineManager();
+
+		if (manager == null)
+			return null;
+
 		StatusLineItem item = (StatusLineItem) manager.find(TEST_STATUS_LINE);
 
 		if (item == null)
@@ -155,19 +159,22 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 		return item;
 	}
 
-	public static StatusLineItem addStatusLine() {
+	private static StatusLineItem addStatusLine() {
 		StatusLineItem item = new StatusLineItem(TEST_STATUS_LINE);
+		IStatusLineManager statusLineManager = getStatusLineManager();
 		try {
-			getStatusLineManager().insertBefore("ElementState", item);
+			statusLineManager.insertBefore("ElementState", item);
 		} catch (final IllegalArgumentException e) {
-			getStatusLineManager().add(item);
+			statusLineManager.add(item);
 		}
 
 		item.setVisible(true);
 		LauncherExtension.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				getStatusLineManager().update(true);
+				IStatusLineManager statusLineManager = getStatusLineManager();
+				if (statusLineManager != null)
+					statusLineManager.update(true);
 			}
 		});
 		return item;
@@ -176,8 +183,10 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 	private static IStatusLineManager getStatusLineManager() {
 		IWorkbenchWindow workbenchWindow = LauncherExtension.getWorkbenchWindow();
 		IEditorPart editor = workbenchWindow.getActivePage().getActiveEditor();
-		IStatusLineManager manager = editor.getEditorSite().getActionBars().getStatusLineManager();
-		return manager;
+		if (editor == null)
+			return null;
+		else
+			return editor.getEditorSite().getActionBars().getStatusLineManager();
 	}
 
 }

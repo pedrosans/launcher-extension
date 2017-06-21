@@ -33,8 +33,13 @@ public class ViewPartListener implements IPartListener2 {
 
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
-		IWorkbenchPart editor = partRef.getPart(false);
 		StatusLineItem statusLineItem = LauncherExtension.getStatusLineItem();
+
+		if (statusLineItem == null)
+			return;
+
+		IWorkbenchPart editor = partRef.getPart(false);
+
 		if (editor instanceof CompilationUnitEditor) {
 			IFileEditorInput editorInput = (IFileEditorInput) ((CompilationUnitEditor) editor).getEditorInput();
 			statusLineItem.show(editorInput.getFile());

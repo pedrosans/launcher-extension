@@ -112,15 +112,17 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 
 	@Override
 	public void sessionStarted(ITestRunSession session) {
-		statusLineItem.bind(testedFile, testFile);
-		statusLineItem.info(testedFile, "Testing 1%");
+		if (statusLineItem != null) {
+			statusLineItem.bind(testedFile, testFile);
+			statusLineItem.info(testedFile, "Testing 1%");
+		}
 	}
 
 	@Override
 	public void sessionFinished(ITestRunSession session) {
 
 		Result result = session.getTestResult(false);
-		if (result == Result.ERROR || result == Result.FAILURE)
+		if (statusLineItem != null && (result == Result.ERROR || result == Result.FAILURE))
 			statusLineItem.error(testedFile, "Test failed");
 
 		if (viewLayoutHijacker != null)
@@ -178,7 +180,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	@Override
 	public void testEnded(TestCaseElement testCaseElement) {
 		completed++;
-		if (completed < size)
+		if (statusLineItem != null && completed < size)
 			statusLineItem.info(testedFile, format("Testing %2.0f%%", (float) completed / size * 100));
 	}
 
@@ -188,8 +190,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	}
 
 	@Override
-	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult,
-			String actualResult) {
+	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 
 	}
 
