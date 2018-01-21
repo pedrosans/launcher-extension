@@ -16,18 +16,14 @@
  */
 package com.github.pedrosans.launcherextension;
 
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -35,9 +31,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.github.pedrosans.launcherextension.autotest.ChangeListener;
-import com.github.pedrosans.launcherextension.background.CleanStatusLineListener;
-import com.github.pedrosans.launcherextension.background.ViewPartListener;
 import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
 
@@ -45,7 +38,7 @@ import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
  * @author Pedro Santos
  * 
  */
-public class LauncherExtension extends AbstractUIPlugin implements IStartup {
+public class LauncherExtension extends AbstractUIPlugin {
 
 	private static final String TEST_STATUS_LINE = "test.status.line";
 	public static final String CLASS_NAME_VARIABLE = "{class_name}";
@@ -63,13 +56,6 @@ public class LauncherExtension extends AbstractUIPlugin implements IStartup {
 
 	public static LauncherExtension getDefault() {
 		return instance;
-	}
-
-	@Override
-	public void earlyStartup() {
-		LauncherExtension.getWorkbenchWindow(false).getActivePage().addPartListener(new ViewPartListener());
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
-		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(new CleanStatusLineListener());
 	}
 
 	@Override
