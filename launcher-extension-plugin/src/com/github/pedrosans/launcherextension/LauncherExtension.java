@@ -23,11 +23,11 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -49,6 +49,7 @@ public class LauncherExtension extends AbstractUIPlugin {
 	public static ImageDescriptor run_ovr_icon;
 	public static ImageDescriptor julaunch_icon;
 	public static ImageDescriptor greenheart_icon;
+	private IStatusLineManager statusLineManager;
 
 	public LauncherExtension() {
 		instance = this;
@@ -61,6 +62,28 @@ public class LauncherExtension extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+
+		IWorkbenchWindow workbenchWindow = LauncherExtension.getWorkbenchWindow();
+		WorkbenchPage workbenchPage = (WorkbenchPage) workbenchWindow.getPages()[0];
+		statusLineManager = workbenchPage.getActionBars().getStatusLineManager();
+
+		StatusLineItem statusLine = new StatusLineItem(TEST_STATUS_LINE);
+
+		try {
+			statusLineManager.insertBefore("ElementState", statusLine);
+		} catch (final IllegalArgumentException e) {
+			statusLineManager.add(statusLine);
+		}
+
+		statusLine.setVisible(true);
+
+		LauncherExtension.getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				statusLineManager.update(true);
+			}
+		});
+
 		run_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/run_exc.png"), null));
 		debug_exc_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/debug_exc.png"), null));
 		run_ovr_icon = ImageDescriptor.createFromURL(FileLocator.find(getBundle(), new Path("icons/running_ovr.png"), null));
@@ -101,6 +124,10 @@ public class LauncherExtension extends AbstractUIPlugin {
 		return getPreferenceStore().getBoolean(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND);
 	}
 
+	public StatusLineItem getStatusLineItem() {
+		return (StatusLineItem) statusLineManager.find(TEST_STATUS_LINE);
+	}
+
 	public static TestRunnerViewPart getJunitView(boolean fromActiveWindow) {
 		IWorkbenchWindow window = getWorkbenchWindow(fromActiveWindow);
 		if (window == null)
@@ -129,50 +156,6 @@ public class LauncherExtension extends AbstractUIPlugin {
 			display = Display.getDefault();
 		}
 		return display;
-	}
-
-	public static StatusLineItem getStatusLineItem() {
-		IStatusLineManager manager = getStatusLineManager();
-
-		if (manager == null)
-			return null;
-
-		StatusLineItem item = (StatusLineItem) manager.find(TEST_STATUS_LINE);
-
-		if (item == null)
-			item = addStatusLine();
-
-		return item;
-	}
-
-	private static StatusLineItem addStatusLine() {
-		StatusLineItem item = new StatusLineItem(TEST_STATUS_LINE);
-		IStatusLineManager statusLineManager = getStatusLineManager();
-		try {
-			statusLineManager.insertBefore("ElementState", item);
-		} catch (final IllegalArgumentException e) {
-			statusLineManager.add(item);
-		}
-
-		item.setVisible(true);
-		LauncherExtension.getDisplay().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				IStatusLineManager statusLineManager = getStatusLineManager();
-				if (statusLineManager != null)
-					statusLineManager.update(true);
-			}
-		});
-		return item;
-	}
-
-	private static IStatusLineManager getStatusLineManager() {
-		IWorkbenchWindow workbenchWindow = LauncherExtension.getWorkbenchWindow();
-		IEditorPart editor = workbenchWindow.getActivePage().getActiveEditor();
-		if (editor == null)
-			return null;
-		else
-			return editor.getEditorSite().getActionBars().getStatusLineManager();
 	}
 
 }

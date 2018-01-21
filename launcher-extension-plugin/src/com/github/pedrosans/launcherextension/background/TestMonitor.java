@@ -89,7 +89,8 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	@Override
 	public void run() {
 		junitView = LauncherExtension.getJunitView(false);
-		statusLineItem = LauncherExtension.getStatusLineItem();
+		// TODO: setup the status line model instead
+		statusLineItem = LauncherExtension.getDefault().getStatusLineItem();
 	}
 
 	// ITestRunSessionListener
@@ -220,8 +221,7 @@ public class TestMonitor extends TestRunListener implements ITestRunSessionListe
 	}
 
 	/*
-	 * Relies on the referenced view since it's called in the test listener
-	 * thread.
+	 * Relies on the referenced view since it's called in the test listener thread.
 	 */
 	private void flagViewToDontGetFocus() {
 		if (junitView != null) {

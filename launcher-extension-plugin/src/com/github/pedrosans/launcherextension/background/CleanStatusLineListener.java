@@ -35,10 +35,7 @@ import com.github.pedrosans.launcherextension.background.view.StatusLineItem;
 public class CleanStatusLineListener extends TestRunListener {
 	@Override
 	public void sessionFinished(ITestRunSession session) {
-		StatusLineItem statusLineItem = LauncherExtension.getStatusLineItem();
-
-		if (statusLineItem == null)
-			return;
+		StatusLineItem statusLineItem = LauncherExtension.getDefault().getStatusLineItem();
 
 		for (ITestElement testElement : session.getChildren()) {
 			if (testElement instanceof TestSuiteElement) {
