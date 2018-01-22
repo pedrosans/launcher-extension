@@ -2,10 +2,10 @@
 <feature
       id="com.github.pedrosans.launcherextension.feature"
       label="Launcher Extension feature"
-      version="0.1.1.qualifier">
+      version="0.1.2.qualifier">
 
-   <description url="https://github.com/pedrosans">
-      Launcher extension for for Java developers
+   <description url="https://github.com/pedrosans/launcher-extension">
+      Eclipse plugin to extend the IDE launch options
    </description>
 
    <copyright url="http://www.example.com/copyright">
@@ -65,6 +65,7 @@ END OF TERMS AND CONDITIONS
    <url>
       <update url="https://github.com/pedrosans/launcher-extension/raw/master/launcher-extension-updatesite"/>
       <discovery label="Pedros&apos;s Github" url="https://github.com/pedrosans"/>
+      <discovery label="Marketplace site" url="https://marketplace.eclipse.org/content/launcher-extensions"/>
    </url>
 
    <plugin
