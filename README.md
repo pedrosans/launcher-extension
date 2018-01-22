@@ -1,24 +1,39 @@
 # launcher-extension
 
-Eclipse plugin adding new launch options and configurations.
+Eclipse plugin to extend the IDE launch options
 
 ## Preferred Launch Configuration
 
-By default, it's possible to create and set launch configurations as favorites, but there's no easy way to assign a shortcut for a specific launch configuration, neither to fixate a button for it.
-This solution:
-- adds the 'preferred launch configuration' as a workspace setting that can be configured to be any pre-existing launch configuration in the IDE.
-- adds the 'Launch Preferred Configuration' button in the toolbar. It launches the preferred launch configuration that can be selected in the button pulldown menu.
-- maps the F12 key to launch the preferred configuration (just next to Eclipse's F11 run shortcut)
+Adds the 'Launch Preferred Configuration' button to the toolbar. Contrary to favorite launch configurations (already supported by Eclipse), the preferred launch configuration can be launched right from the toolbar.
+
+- the preferred launch configuration can be selected in the button pull-down menu
+- can be launched by the F12 key (at the side of Eclipse's F11 run shortcut)
 
 ## Correspondent Test Launch
 
-A 'Run Correspondent Test' button is also add in the toolbar and will launch the test correspondent to the active Java editor class being edited.
-By default, the plugin searches the correspondent test matching the "{classname}Test" pattern, but it can be changed in the preference panel.
+A 'Run Correspondent Test' button is also add in the toolbar and will launch the test corresponding to the active Java class being edited.
+By default, the plugin searches the correspondent test matching the "{classname}Test" pattern, but it can be configured in the preference page.
+
+- preference page in the 'Preferences' window at: Run/Debug > Launching > Launch Extension
 
 ## Installation
 
-Can be installed adding the software site: https://github.com/pedrosans/launcher-extension/raw/master/launcher-extension-updatesite
+### From Eclipse Marketplace [![Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client](https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png)](http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=3763013 "Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client")
 
-*at* Window>Preferences>Install/Update>Available Software Sites>Add...
+1) Help > Eclipse Marketplace...
+
+2) Search for 'Launcher extensions' and proceed to the installation by clicking the 'Install' button
+
+### From the software site
+
+1) Window>Preferences>Install/Update>Available Software Sites>Add...
 
 *or at* Help>Install New Software>Add..
+
+2) add the software site: 
+
+```
+https://github.com/pedrosans/launcher-extension/raw/master/launcher-extension-updatesite
+```
+
+3) select 'Launcher Extension feature' and proceed to the installation clicking "Next >"
