@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.github.pedrosans.launcherextension.LauncherExtension;
+import com.github.pedrosans.launcherextension.background.BackgroundLauncherStarter;
 
 /**
  * @author Pedro Santos
@@ -37,27 +38,27 @@ public class LauncherExtensionPreferencePage extends FieldEditorPreferencePage i
 	public LauncherExtensionPreferencePage() {
 		super(GRID);
 		setPreferenceStore(LauncherExtension.getDefault().getPreferenceStore());
-		// setDescription("Launch extension configuration");
 	}
 
 	public void init(IWorkbench workbench) {
 	}
 
 	public void createFieldEditors() {
-		Group group = SWTFactory.createGroup(getFieldEditorParent(), "Automatic test launch", 1, 1,
-				GridData.FILL_HORIZONTAL);
-		Composite spacer = SWTFactory.createComposite(group, 1, 1, GridData.FILL_HORIZONTAL);
-		addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST, "&Auto launch correspondent class test",
-				spacer));
+		Composite group = SWTFactory.createComposite(getFieldEditorParent(), 1, 1, GridData.FILL_HORIZONTAL);
 
-		addField(new StringFieldEditor(PreferenceConstants.P_CLASS_TEST_FILE_PATTERN,
-				"Correspondent test class pattern:", spacer));
+		Group mainGroup = SWTFactory.createGroup(group, "Correspondent test", 1, 1, GridData.FILL_HORIZONTAL);
+		Composite mainSpacer = SWTFactory.createComposite(mainGroup, 1, 1, GridData.FILL_HORIZONTAL);
+		addField(new StringFieldEditor(PreferenceConstants.P_CLASS_TEST_FILE_PATTERN, "Pattern:", mainSpacer));
 
-		addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND,
-				"Run auto launched tests in background (the JUnit plugin view will be untouched by this run)", spacer));
-
-		addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST_PROJECT_ON_MULTIPLE_FILES_CHANGED,
-				"&Launch all project's tests on multiple classes changed", spacer));
+		if (BackgroundLauncherStarter.running) {
+			Group backgroundGroup = SWTFactory.createGroup(group, "Background starter", 1, 1, GridData.FILL_HORIZONTAL);
+			Composite spacer = SWTFactory.createComposite(backgroundGroup, 1, 1, GridData.FILL_HORIZONTAL);
+			addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST, "&Auto launch correspondent class test", spacer));
+			addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST_IN_BACKGROUND,
+					"Run auto launched tests in background (the JUnit plugin view will be untouched by this run)", spacer));
+			addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_TEST_PROJECT_ON_MULTIPLE_FILES_CHANGED,
+					"&Launch all project's tests on multiple classes changed", spacer));
+		}
 
 	}
 

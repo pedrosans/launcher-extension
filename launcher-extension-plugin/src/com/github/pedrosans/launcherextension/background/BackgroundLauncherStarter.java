@@ -30,10 +30,17 @@ import com.github.pedrosans.launcherextension.autotest.ChangeListener;
  */
 public class BackgroundLauncherStarter implements IStartup {
 
+	/*
+	 * Temporary flag since this background auto launch wont make to the stable
+	 * version
+	 */
+	public static boolean running;
+
 	@Override
 	public void earlyStartup() {
 		LauncherExtension.getWorkbenchWindow(false).getActivePage().addPartListener(new ViewPartListener());
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new ChangeListener(), IResourceChangeEvent.POST_BUILD);
 		JUnitCorePlugin.getDefault().getNewTestRunListeners().add(new CleanStatusLineListener());
+		running = true;
 	}
 }
