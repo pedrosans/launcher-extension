@@ -16,6 +16,14 @@ By default, the plugin searches the correspondent test matching the "{classname}
 
 - preference page in the 'Preferences' window at: Run/Debug > Launching > Launch Extension
 
+## Automatic test run
+
+This automatic test launch can be enabled in the plugin preference panel.
+If enabled, it will automatic launch the class test in background, if detected, it reports any failure in the IDE bottom status line.
+
+For example: while working on the class FooReader, any save + build will trigger FooReaderTest. This test will run in background (JUnit view won't be touched), and only it's progress percentage
+The test run will not get the JUnit view focus, neither JUnit view will show its status. The only goal of this execution is to proactively report failures if any.
+
 ## Installation
 
 ### From Eclipse Marketplace [![Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client](https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png)](http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=3763013 "Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client")
