@@ -8,14 +8,14 @@
             id="com.github.pedrosans.launcherextension.commands.category">
       </category>
       <command
-            name="Lanch Correspondent Test Command"
+            name="Launch Correspondent Test"
             categoryId="com.github.pedrosans.launcherextension.commands.category"
             id="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest">
       </command>
       <command
             categoryId="com.github.pedrosans.launcherextension.commands.category"
             id="com.github.pedrosans.launcherextension.command.launchPreferedConfiguration"
-            name="Lanch Prefered Configuration Command">
+            name="Launch Preferred Configuration">
       </command>
    </extension>
    <extension
@@ -50,7 +50,7 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="com.github.pedrosans.launcherextension.toolbars.launch"
-               label="Launcher Extensions">
+               label="Launcher Extension">
             <command
                   commandId="com.github.pedrosans.launcherextension.commands.launchCorrespondentTest"
                   icon="icons/julaunch.png"
