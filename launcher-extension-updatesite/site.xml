@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.github.pedrosans.launcherextension.feature_0.1.2.201801220005.jar" id="com.github.pedrosans.launcherextension.feature" version="0.1.2.201801220005">
+   <feature url="features/com.github.pedrosans.launcherextension.feature_0.1.3.202104160149.jar" id="com.github.pedrosans.launcherextension.feature" version="0.1.3.202104160149">
       <category name="launcher-extension-category"/>
    </feature>
    <category-def name="launcher-extension-category" label="Launcher Extension"/>
