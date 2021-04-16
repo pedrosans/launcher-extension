@@ -16,6 +16,8 @@
  */
 package com.github.pedrosans.launcherextension.toolbar.action;
 
+import static com.github.pedrosans.launcherextension.LauncherExtension.SELECTED_TAG;
+
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.ui.actions.ActionMessages;
 import org.eclipse.jface.action.Action;
@@ -31,10 +33,9 @@ public class SetPreferedLaunchMode extends Action {
 
 	public SetPreferedLaunchMode(String mode) {
 		this.mode = mode;
-		boolean selected = mode.equals(LauncherExtension.getDefault().getPreferedLaunchMode());
-		setChecked(selected);
-		setEnabled(!selected);
+
 		StringBuilder text = new StringBuilder();
+
 		if (ILaunchManager.RUN_MODE.equals(mode)) {
 			text.append(ActionMessages.RunLastAction_1);
 			setImageDescriptor(LauncherExtension.run_exc_icon);
@@ -44,8 +45,12 @@ public class SetPreferedLaunchMode extends Action {
 		}
 
 		text.append(" mode");
-		if (selected)
-			text.append(" (Selected)");
+
+		if (mode.equals(LauncherExtension.getDefault().getPreferedLaunchMode())) {
+			setChecked(true);
+			text.append(SELECTED_TAG);
+		}
+
 		setText(text.toString());
 	}
 

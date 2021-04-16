@@ -40,15 +40,18 @@ import com.github.pedrosans.launcherextension.preference.PreferenceConstants;
  */
 public class LauncherExtension extends AbstractUIPlugin {
 
-	private static final String TEST_STATUS_LINE = "test.status.line";
 	public static final String CLASS_NAME_VARIABLE = "{class_name}";
-	private static LauncherExtension instance;
 	public static final String PLUGIN_ID = "launcher.extension";
+	public static final String SELECTED_TAG = " [selected]";
+	public static final String FAVORITE_TAG = " [favorite]";
 	public static ImageDescriptor run_exc_icon;
 	public static ImageDescriptor debug_exc_icon;
 	public static ImageDescriptor run_ovr_icon;
 	public static ImageDescriptor julaunch_icon;
 	public static ImageDescriptor greenheart_icon;
+
+	private static final String TEST_STATUS_LINE = "test.status.line";
+	private static LauncherExtension instance;
 	private IStatusLineManager statusLineManager;
 
 	public LauncherExtension() {

@@ -16,6 +16,9 @@
  */
 package com.github.pedrosans.launcherextension.toolbar;
 
+import static com.github.pedrosans.launcherextension.LauncherExtension.FAVORITE_TAG;
+import static com.github.pedrosans.launcherextension.LauncherExtension.SELECTED_TAG;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +51,7 @@ public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionI
 	public PreferedLaunchConfigurationOptions populate(List<ILaunchConfiguration> favoriteLaunches,
 			List<ILaunchConfiguration> lastLaunches) {
 		for (ILaunchConfiguration conf : favoriteLaunches)
-			this.contribute(conf, "*");
+			this.contribute(conf, FAVORITE_TAG);
 
 		lastLaunches.removeAll(favoriteLaunches);
 
@@ -63,30 +66,25 @@ public class PreferedLaunchConfigurationOptions extends ArrayList<IContributionI
 		boolean preferedConfig = conf.getName().equals(prefered);
 
 		if (preferedConfig)
-			addPreferedConfiguration(conf);
+			addPreferedConfiguration(conf, sufix);
 		else
 			addConfiguration(conf, sufix);
 
 	}
 
-	private void addPreferedConfiguration(ILaunchConfiguration conf) {
-		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf));
-		actionContribution.setVisible(true);
+	private void addPreferedConfiguration(ILaunchConfiguration conf, String sufix) {
+		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf, sufix + SELECTED_TAG));
 		actionContribution.getAction().setChecked(true);
-		actionContribution.getAction().setEnabled(false);
-		actionContribution.getAction().setText(actionContribution.getAction().getText() + " (selected)");
 		this.add(0, actionContribution);
 	}
 
 	private void addConfiguration(ILaunchConfiguration conf, String sufix) {
-		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf));
-		actionContribution.getAction().setText(actionContribution.getAction().getText() + sufix);
-		actionContribution.setVisible(true);
+		ActionContributionItem actionContribution = new ActionContributionItem(newSetPreferedConfigAction(conf, sufix));
 		this.add(actionContribution);
 	}
 
-	protected Action newSetPreferedConfigAction(ILaunchConfiguration conf) {
-		return new SetPreferedLaunchConfiguration(conf);
+	protected Action newSetPreferedConfigAction(ILaunchConfiguration conf, String sufix) {
+		return new SetPreferedLaunchConfiguration(conf, sufix);
 	}
 
 }

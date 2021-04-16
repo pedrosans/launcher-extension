@@ -49,7 +49,7 @@ public class PreferedLaunchConfigurationOptionsTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected Action newSetPreferedConfigAction(ILaunchConfiguration conf) {
+			protected Action newSetPreferedConfigAction(ILaunchConfiguration conf, String sufix) {
 				return new StubAction((StubConfig) conf);
 			}
 		};

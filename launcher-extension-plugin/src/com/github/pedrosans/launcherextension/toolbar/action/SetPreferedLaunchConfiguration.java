@@ -30,9 +30,9 @@ public class SetPreferedLaunchConfiguration extends Action {
 
 	private ILaunchConfiguration configuration;
 
-	public SetPreferedLaunchConfiguration(ILaunchConfiguration configuration) {
+	public SetPreferedLaunchConfiguration(ILaunchConfiguration configuration, String sufix) {
 		this.configuration = configuration;
-		setText(configuration.getName());
+		setText(configuration.getName() + sufix);
 		setImageDescriptor(DebugUITools.getDefaultImageDescriptor(configuration));
 	}
 
